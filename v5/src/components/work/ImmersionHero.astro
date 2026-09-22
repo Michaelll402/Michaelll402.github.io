@@ -1,0 +1,425 @@
+---
+// §15 v4.5 — THE IMMERSION (Michael's Soda reference, per project, honest).
+// Every case study opens as a full-viewport scene inside that project's world:
+// dark accent atmosphere, the living artwork as a cursor-tilting centerpiece,
+// the project's OWN objects drifting on parallax layers and repelled by the
+// pointer, accent particles rising, and the facts as glass cards.
+// Engine: src/scripts/immersion.ts (reference physics, perf-disciplined).
+import type { CaseStudy } from "../../content/work/types";
+
+interface Props {
+  cs: CaseStudy;
+}
+const { cs } = Astro.props;
+
+// per-project satellite objects (sprite id, layer, position, size)
+type F = { s: string; top: string; left: string; w: number; layer: "fg" | "bg"; hideSm?: boolean };
+const WORLDS: Record<string, F[]> = {
+  support: [
+    { s: "ticket", top: "14%", left: "58%", w: 120, layer: "fg" },
+    { s: "chip-agent", top: "64%", left: "54%", w: 96, layer: "fg", hideSm: true },
+    { s: "bell", top: "26%", left: "88%", w: 64, layer: "fg" },
+    { s: "ticket", top: "74%", left: "84%", w: 88, layer: "fg", hideSm: true },
+    { s: "chip-admin", top: "8%", left: "70%", w: 104, layer: "fg", hideSm: true },
+    { s: "ticket", top: "38%", left: "30%", w: 64, layer: "bg" },
+    { s: "bell", top: "70%", left: "56%", w: 44, layer: "bg" },
+    { s: "chip-agent", top: "18%", left: "58%", w: 70, layer: "bg" },
+  ],
+  vision: [
+    { s: "bracket", top: "12%", left: "58%", w: 110, layer: "fg" },
+    { s: "face", top: "64%", left: "55%", w: 104, layer: "fg", hideSm: true },
+    { s: "mesh", top: "24%", left: "88%", w: 84, layer: "fg" },
+    { s: "face", top: "76%", left: "86%", w: 76, layer: "fg", hideSm: true },
+    { s: "bracket", top: "6%", left: "72%", w: 78, layer: "fg", hideSm: true },
+    { s: "mesh", top: "40%", left: "30%", w: 60, layer: "bg" },
+    { s: "bracket", top: "72%", left: "58%", w: 52, layer: "bg" },
+    { s: "face", top: "16%", left: "60%", w: 56, layer: "bg" },
+  ],
+  simiutopia: [
+    { s: "truck", top: "16%", left: "57%", w: 130, layer: "fg" },
+    { s: "tile", top: "64%", left: "54%", w: 92, layer: "fg", hideSm: true },
+    { s: "stopm", top: "26%", left: "88%", w: 58, layer: "fg" },
+    { s: "truck", top: "76%", left: "84%", w: 96, layer: "fg", hideSm: true },
+    { s: "tile", top: "8%", left: "70%", w: 84, layer: "fg", hideSm: true },
+    { s: "truck", top: "40%", left: "29%", w: 70, layer: "bg" },
+    { s: "stopm", top: "70%", left: "58%", w: 40, layer: "bg" },
+    { s: "tile", top: "16%", left: "58%", w: 56, layer: "bg" },
+  ],
+  subways: [
+    { s: "st-a", top: "14%", left: "58%", w: 76, layer: "fg" },
+    { s: "st-b", top: "64%", left: "54%", w: 88, layer: "fg", hideSm: true },
+    { s: "st-c", top: "24%", left: "88%", w: 70, layer: "fg" },
+    { s: "st-d", top: "76%", left: "85%", w: 80, layer: "fg", hideSm: true },
+    { s: "seg", top: "8%", left: "70%", w: 120, layer: "fg", hideSm: true },
+    { s: "st-c", top: "40%", left: "30%", w: 52, layer: "bg" },
+    { s: "st-a", top: "72%", left: "58%", w: 44, layer: "bg" },
+    { s: "seg", top: "16%", left: "58%", w: 80, layer: "bg" },
+  ],
+};
+const world = WORLDS[cs.slug] ?? [];
+const fgF = world.filter((f) => f.layer === "fg");
+const bgF = world.filter((f) => f.layer === "bg");
+---
+
+<section class="immersion" aria-label={`${cs.title} — project scene`}>
+  <div class="imm-layer imm-bg" data-imm-bg aria-hidden="true">
+    {bgF.map((f) => (
+      <span class={`imm-floater dim ${f.hideSm ? "imm-hide-sm" : ""}`} style={`top:${f.top}; left:${f.left}; width:${f.w}px`}>
+        <svg viewBox="0 0 100 100"><use href={`#imm-${f.s}`} /></svg>
+      </span>
+    ))}
+  </div>
+
+  <div class="imm-ui">
+    <p class="imm-crumbs t-mono-s">
+      <a href="/#work" class="imm-link">← All work</a>
+      <span>{cs.position} / 05</span>
+    </p>
+    {/* No view-transition-name. These were left from v3, where they paired with
+        counterparts on the old work index. Today they have no partner, so the
+        browser gives each its own group with a default fade — which pulls them
+        OUT of the root snapshot and means they fade in independently while the
+        rest of the page opens as a circle. One page, one group. */}
+    <h1 class="imm-title">{cs.title}</h1>
+    <p class="imm-oneliner">{cs.oneLiner}</p>
+    <div class="imm-chips">
+      <div class="imm-card">
+        <span class="t-mono-s imm-card-label">Context</span>
+        <span class="imm-card-value">{cs.contextLine}</span>
+      </div>
+      <div class="imm-card">
+        <span class="t-mono-s imm-card-label">Role</span>
+        <span class="imm-card-value">{cs.role}</span>
+      </div>
+      <div class="imm-card imm-card-stack">
+        <span class="t-mono-s imm-card-label">Stack</span>
+        <span class="t-mono-s imm-card-value imm-stack">{cs.stack.join(" · ")}</span>
+      </div>
+    </div>
+    <p class="imm-repo">
+      <a href={cs.repoHref} class="imm-link t-mono-s">Repository ↗</a>
+    </p>
+  </div>
+
+  <div class="imm-center-wrap">
+    <figure class="case-visual imm-center" data-imm-center>
+      <slot name="art" />
+      <figcaption class="t-mono-s imm-caption">{cs.heroCaption}</figcaption>
+    </figure>
+  </div>
+
+  <div class="imm-layer imm-fg" data-imm-fg aria-hidden="true">
+    {fgF.map((f) => (
+      <span class={`imm-floater ${f.hideSm ? "imm-hide-sm" : ""}`} style={`top:${f.top}; left:${f.left}; width:${f.w}px`}>
+        <svg viewBox="0 0 100 100"><use href={`#imm-${f.s}`} /></svg>
+      </span>
+    ))}
+  </div>
+
+  <!-- sprite library: the project's own objects, drawn honest -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <g id="imm-ticket">
+        <rect x="8" y="18" width="84" height="64" rx="8" fill="var(--sp-panel)" stroke="var(--sp-stroke)" stroke-width="2" />
+        <rect x="18" y="32" width="46" height="7" rx="3" fill="var(--acc)" />
+        <rect x="18" y="47" width="62" height="5" rx="2" fill="var(--sp-dim)" />
+        <rect x="18" y="59" width="52" height="5" rx="2" fill="var(--sp-dim)" />
+        <circle cx="80" cy="34" r="5" fill="var(--acc)" />
+      </g>
+      <g id="imm-chip-agent">
+        <rect x="6" y="34" width="88" height="32" rx="16" fill="var(--sp-panel)" stroke="var(--sp-stroke)" stroke-width="2" />
+        <circle cx="24" cy="50" r="8" fill="var(--acc)" />
+        <rect x="38" y="46" width="44" height="8" rx="4" fill="var(--sp-dim)" />
+      </g>
+      <g id="imm-chip-admin">
+        <rect x="6" y="34" width="88" height="32" rx="16" fill="var(--sp-panel)" stroke="var(--sp-stroke)" stroke-width="2" />
+        <rect x="16" y="42" width="16" height="16" rx="3" fill="var(--acc)" />
+        <rect x="40" y="46" width="42" height="8" rx="4" fill="var(--sp-dim)" />
+      </g>
+      <g id="imm-bell">
+        <path d="M50 18c-14 0-22 10-22 24v14l-8 12h60l-8-12V42c0-14-8-24-22-24Z" fill="var(--sp-panel)" stroke="var(--sp-stroke)" stroke-width="2" />
+        <circle cx="50" cy="76" r="7" fill="var(--acc)" />
+      </g>
+      <g id="imm-bracket">
+        <path d="M14 34V22a8 8 0 0 1 8-8h12M66 14h12a8 8 0 0 1 8 8v12M86 66v12a8 8 0 0 1-8 8H66M34 86H22a8 8 0 0 1-8-8V66" fill="none" stroke="var(--acc)" stroke-width="5" stroke-linecap="round" />
+        <circle cx="50" cy="50" r="10" fill="var(--sp-dim)" />
+      </g>
+      <g id="imm-face">
+        <rect x="24" y="16" width="52" height="60" rx="18" fill="var(--sp-panel)" stroke="var(--sp-stroke)" stroke-width="2" />
+        <circle cx="40" cy="42" r="5" fill="var(--acc)" />
+        <circle cx="60" cy="42" r="5" fill="var(--acc)" />
+        <rect x="40" y="58" width="20" height="5" rx="2.5" fill="var(--sp-dim)" />
+        <line x1="50" y1="16" x2="50" y2="7" fill="none" stroke="var(--acc)" stroke-width="5" stroke-linecap="round" />
+        <circle cx="50" cy="5" r="3" fill="var(--acc)" />
+      </g>
+      <g id="imm-mesh">
+        <circle cx="26" cy="30" r="4" fill="var(--acc)" />
+        <circle cx="70" cy="22" r="4" fill="var(--acc)" />
+        <circle cx="78" cy="64" r="4" fill="var(--acc)" />
+        <circle cx="38" cy="74" r="4" fill="var(--acc)" />
+        <path d="M26 30 70 22 78 64 38 74Z M26 30 78 64 M70 22 38 74" fill="none" stroke="var(--acc)" stroke-width="1.5" opacity="0.7" />
+      </g>
+      <g id="imm-truck">
+        <rect x="8" y="34" width="56" height="30" rx="5" fill="var(--acc)" />
+        <rect x="64" y="42" width="26" height="22" rx="4" fill="var(--sp-panel)" stroke="var(--sp-stroke)" stroke-width="2" />
+        <circle cx="26" cy="70" r="8" fill="var(--sp-dark)" />
+        <circle cx="74" cy="70" r="8" fill="var(--sp-dark)" />
+      </g>
+      <g id="imm-tile">
+        <rect x="14" y="14" width="72" height="72" rx="8" fill="var(--sp-panel)" stroke="var(--sp-stroke)" stroke-width="2" />
+        <line x1="24" y1="50" x2="40" y2="50" fill="none" stroke="var(--acc)" stroke-width="5" stroke-linecap="round" />
+        <line x1="48" y1="50" x2="64" y2="50" fill="none" stroke="var(--acc)" stroke-width="5" stroke-linecap="round" />
+        <line x1="72" y1="50" x2="78" y2="50" fill="none" stroke="var(--acc)" stroke-width="5" stroke-linecap="round" />
+      </g>
+      <g id="imm-stopm">
+        <rect x="30" y="30" width="40" height="40" rx="6" fill="var(--sp-panel)" stroke="var(--sp-stroke)" stroke-width="2" />
+        <rect x="42" y="42" width="16" height="16" rx="3" fill="var(--acc)" />
+      </g>
+      <g id="imm-st-a">
+        <circle cx="50" cy="50" r="34" fill="#ffd800" stroke="#141414" stroke-width="4" />
+        <text x="50" y="62" text-anchor="middle" font-family="var(--font-mono)" font-size="34" font-weight="600" fill="#141414">A</text>
+      </g>
+      <g id="imm-st-b">
+        <circle cx="50" cy="50" r="34" fill="#e41f18" stroke="#141414" stroke-width="4" />
+        <text x="50" y="62" text-anchor="middle" font-family="var(--font-mono)" font-size="34" font-weight="600" fill="#ffffff">B</text>
+      </g>
+      <g id="imm-st-c">
+        <circle cx="50" cy="50" r="34" fill="#005ca5" stroke="#141414" stroke-width="4" />
+        <text x="50" y="62" text-anchor="middle" font-family="var(--font-mono)" font-size="34" font-weight="600" fill="#ffffff">C</text>
+      </g>
+      <g id="imm-st-d">
+        <circle cx="50" cy="50" r="34" fill="#4ca22f" stroke="#141414" stroke-width="4" />
+        <text x="50" y="62" text-anchor="middle" font-family="var(--font-mono)" font-size="34" font-weight="600" fill="#141414">D</text>
+      </g>
+      <g id="imm-seg">
+        <line x1="10" y1="60" x2="90" y2="40" fill="none" stroke="var(--acc)" stroke-width="8" stroke-linecap="round" />
+        <circle cx="10" cy="60" r="9" fill="var(--sp-panel)" stroke="var(--sp-stroke)" stroke-width="2" />
+        <circle cx="90" cy="40" r="9" fill="var(--sp-panel)" stroke="var(--sp-stroke)" stroke-width="2" />
+      </g>
+    </defs>
+  </svg>
+</section>
+
+<style>
+  /* ---------- the stage: always cinematic, tinted by the project ---------- */
+  .immersion {
+    --imm-ink: var(--ink);
+    --imm-dim: var(--ink-2);
+    position: relative;
+    min-height: calc(100svh - var(--header-h));
+    overflow: clip;
+    display: grid;
+    align-items: center;
+    color: var(--imm-ink);
+  }
+  @media (min-width: 1200px) and (max-height: 900px) {
+    /* Reserve the fixed header band when the text column exceeds a laptop viewport. */
+    .immersion { padding-top: calc(var(--header-h) + var(--space-3)); }
+  }
+  .imm-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .imm-bg { z-index: 1; opacity: 0.55; }
+  .imm-fg { z-index: 4; }
+  .imm-floater {
+    position: absolute;
+    display: block;
+    filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
+    will-change: transform;
+  }
+  .imm-floater.dim { opacity: 0.6; }
+  .imm-floater svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+
+  /* ---------- particles ---------- */
+  .imm-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .immersion :global(.imm-particle) {
+    position: absolute;
+    bottom: -40px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, color-mix(in srgb, var(--acc) 85%, #ffffff), color-mix(in srgb, var(--acc) 45%, transparent) 65%, transparent);
+    animation: imm-rise linear forwards;
+  }
+  @keyframes imm-rise {
+    0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+    10% { opacity: inherit; }
+    90% { opacity: inherit; }
+    100% { transform: translateY(-110vh) translateX(30px) rotate(360deg); opacity: 0; }
+  }
+
+  /* ---------- UI ---------- */
+  .imm-ui {
+    position: relative;
+    z-index: 5;
+    max-width: var(--container);
+    width: 100%;
+    margin-inline: auto;
+    padding: calc(var(--header-h) * 0.6) var(--gutter) var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    pointer-events: none;
+  }
+  .imm-ui a { pointer-events: auto; }
+  .imm-crumbs {
+    display: flex;
+    justify-content: space-between;
+    color: var(--imm-dim);
+    text-transform: uppercase;
+    margin: 0 0 var(--space-4);
+  }
+  /* These measured 19px and 16px. The box is grown to the tap minimum and the
+     extra height is pulled back out with a negative margin, so the target is
+     real without the hero's rhythm moving. */
+  .imm-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    margin-block: calc((var(--tap-min) - 1.5em) / -2);
+    font-family: var(--font-mono);
+    letter-spacing: var(--track-mono);
+    text-transform: uppercase;
+    color: var(--imm-dim);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .imm-link:hover, .imm-link:focus-visible { color: var(--imm-ink); }
+  .imm-title {
+    font-family: var(--font-display);
+    font-variation-settings: "opsz" var(--opsz-display), "wght" 560;
+    font-size: clamp(2.5rem, 1.5rem + 4.4vw, 4.8rem);
+    line-height: 0.98;
+    letter-spacing: -0.015em;
+    margin: 0;
+    text-shadow: 0 2px 40px rgba(0, 0, 0, 0.55);
+  }
+  @media (min-width: 1181px) {
+    .imm-crumbs { max-width: 100%; }
+    .imm-ui > :not(.imm-crumbs) {
+      max-width: min(46%, 600px);
+    }
+  }
+  /* THE CHAPTER BAR OWNS THIS BAND.
+     Below 1200px Playhead swaps its rail for a sticky bar, 40px tall, pinned at
+     the header height — landing exactly on this row. "01 / 05 · UNDERSTAND" was
+     printed straight over "← All work", so the only route back to the index was
+     both invisible and untappable on a phone (a hit test on the link returned
+     the bar). The crumbs start below the bar instead. */
+  @media (max-width: 1199px) {
+    .imm-crumbs {
+      margin-top: calc(40px + var(--space-3));
+    }
+  }
+  .imm-oneliner {
+    font-size: var(--text-body-l);
+    line-height: var(--leading-body);
+    color: var(--imm-dim);
+    max-width: 44ch;
+    margin: 0;
+  }
+  .imm-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    max-width: 620px;
+    margin-top: var(--space-3);
+    pointer-events: auto;
+  }
+  .imm-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+    background: var(--stage-glass);
+    border: 1px solid var(--stage-edge);
+    box-shadow: inset 0 1px 0 var(--stage-rim), var(--stage-shadow);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-radius: 14px;
+    padding: var(--space-3) var(--space-4);
+    max-width: 300px;
+    transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+  }
+  .imm-card:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--acc) 60%, transparent); }
+  .imm-card-label { color: var(--acc-deep); text-transform: uppercase; }
+  :global(html[data-mode="night"]) .imm-card-label { color: color-mix(in srgb, var(--acc) 70%, #ffffff); }
+  .imm-card-value { font-size: var(--text-body-s); color: var(--imm-ink); }
+  .imm-stack { text-transform: uppercase; color: var(--imm-dim); }
+  .imm-card-stack { max-width: 620px; }
+  .imm-repo { margin: var(--space-2) 0 0; }
+
+  /* ---------- centerpiece ---------- */
+  .imm-center-wrap {
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    right: max(var(--gutter), calc((100vw - var(--container)) / 2));
+    translate: 0 -50%;
+    width: min(44vw, 700px);
+    pointer-events: none;
+  }
+  .imm-center {
+    /* the wrap stays inert; the figure itself accepts hover so the glowing
+       edge can find it (the wrap must not block the floaters behind it) */
+    pointer-events: auto;
+    margin: 0;
+    overflow: hidden;
+    border-radius: var(--radius-s);
+    background: var(--stage-glass);
+    border: 1px solid var(--stage-edge);
+    box-shadow: inset 0 1px 0 var(--stage-rim), var(--stage-shadow);
+    will-change: transform;
+  }
+  .imm-caption {
+    display: block;
+    padding: var(--space-2) var(--space-4);
+    border-top: 1px solid var(--stage-edge);
+    color: var(--imm-dim);
+    text-transform: uppercase;
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 1180px) {
+    .immersion { align-items: start; }
+    .imm-ui { padding-top: var(--space-6); }
+    .imm-center-wrap {
+      position: relative;
+      top: auto;
+      right: auto;
+      translate: none;
+      width: min(92vw, 640px);
+      margin: calc(-1 * var(--space-6)) auto var(--space-8);
+      z-index: 3;
+    }
+    .imm-title { max-width: 100%; }
+  }
+  @media (max-width: 640px) {
+    .imm-hide-sm { display: none; }
+  }
+  @media (pointer: coarse), (hover: none), (max-width: 1023px) {
+    /* Keep the primary artwork and factual context in the normal page flow.
+       Static mobile scenes need no backdrop sampling or promoted floaters. */
+    .imm-card { -webkit-backdrop-filter: none; backdrop-filter: none; }
+    .imm-floater { filter: none; will-change: auto; }
+    .imm-center { will-change: auto; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .immersion :global(.imm-particle) { animation: none; display: none; }
+    .imm-card { transition: none; }
+  }
+</style>
+
+<script>
+  import { initImmersion, destroyImmersion } from "../../scripts/immersion";
+  initImmersion();
+  document.addEventListener("astro:page-load", initImmersion);
+  document.addEventListener("astro:before-swap", destroyImmersion);
+</script>

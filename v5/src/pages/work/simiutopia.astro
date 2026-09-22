@@ -1,0 +1,23 @@
+---
+import CaseLayout from "../../components/work/CaseLayout.astro";
+import Chapter from "../../components/work/Chapter.astro";
+import SimiArt from "../../components/art/SimiArt.astro";
+import SimiDemo from "../../components/islands/SimiDemo";
+import { simiutopia } from "../../content/work/simiutopia";
+
+const ch = simiutopia.chapters;
+---
+
+<CaseLayout cs={simiutopia}>
+  <SimiArt slot="hero-art" />
+
+  <Chapter chapter={ch[0]} />
+  <Chapter chapter={ch[1]} />
+  <Chapter chapter={ch[2]}>
+    <SimiDemo slot="demo" client:visible={{ rootMargin: "300px" }} />
+  </Chapter>
+  <Chapter chapter={ch[3]} />
+  <Chapter chapter={ch[4]} />
+  <Chapter chapter={ch[5]} />
+  <Chapter chapter={ch[6]} />
+</CaseLayout>

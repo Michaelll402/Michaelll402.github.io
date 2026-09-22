@@ -1,0 +1,72 @@
+---
+// experience-about-skills.md — Experience. Copy verbatim from the locked set.
+---
+
+<section id="path" class="section path" data-quiet aria-labelledby="path-heading">
+  <div class="container">
+    <h2 id="path-heading" class="label" data-reveal="label">
+      <span>Work experience</span><span class="label-rule"></span>
+    </h2>
+
+    <div class="path-entry" data-reveal>
+      <div class="path-meta">
+        <p class="t-mono-s path-when">Jun 2025 — Aug 2025</p>
+        <p class="t-mono-s path-where">Cairo, Egypt</p>
+      </div>
+      <div class="path-body">
+        <h3 class="t-h2 path-role" data-reveal="lines">
+          Full-Stack Developer Intern<span class="path-org">Caresynq Business Consulting</span>
+        </h3>
+        <div class="prose">
+          <p>
+            At Caresynq I worked on healthcare web applications used by clinic staff and partner
+            teams. I built React UI features, developed and maintained REST APIs in Node.js and
+            Express for authentication, patient records, and clinic operations, and wrote MongoDB
+            queries while testing and debugging the backend. I also helped migrate legacy ASP.NET
+            components to a React and Node.js stack and supported testing during the rollout. The
+            team ran on Git pull requests, code reviews, daily stand-ups, and sprint planning,
+            which is where I learned to ship inside someone else's process.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .path-entry {
+    max-width: 64rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+    padding-top: var(--space-5);
+    border-top: var(--hairline) solid var(--line-2);
+  }
+  @media (min-width: 900px) {
+    .path-entry {
+      grid-template-columns: 13rem minmax(0, 1fr);
+      gap: var(--space-6);
+    }
+  }
+  .path-when {
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+  .path-where {
+    color: var(--ink-3);
+    text-transform: uppercase;
+    margin-top: var(--space-1);
+  }
+  .path-role {
+    margin-bottom: var(--space-5);
+  }
+  .path-org {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    letter-spacing: var(--track-mono);
+    text-transform: uppercase;
+    color: var(--acc);
+    margin-top: var(--space-3);
+  }
+</style>

@@ -1,0 +1,168 @@
+---
+// §15 v4.2 LIVING RECONSTRUCTION — robot face scan.
+// A synthetic robot head sits in a viewfinder; a scan beam sweeps it, the
+// face-mesh landmarks light as the beam passes, the readout flips from
+// SCANNING to MATCH, and a row is written to the stores. Loops ~4.8s.
+// Honest: synthetic subject only (privacy boundary, docs/facts/vision.md);
+// pretrained inference is what the readout claims — nothing more.
+interface Props {
+  title?: string;
+}
+const { title = "Living reconstruction of the pipeline: a synthetic robot face is scanned, matched, classified, and logged. No real faces or attendance data appear." } = Astro.props;
+
+// abstract face-mesh landmarks (synthetic geometry, not a real face)
+const mesh: [number, number][] = [
+  [250, 120], [310, 100], [370, 120], // brow
+  [250, 175], [310, 160], [370, 175], // eyes line
+  [310, 205], // nose
+  [265, 250], [310, 265], [355, 250], // mouth arc
+  [225, 200], [395, 200], // cheeks
+];
+const links: [number, number][] = [
+  [0, 1], [1, 2], [0, 3], [2, 5], [1, 4], [3, 4], [4, 5], [4, 6],
+  [6, 8], [7, 8], [8, 9], [3, 10], [5, 11], [10, 7], [11, 9],
+];
+---
+
+<svg viewBox="0 0 800 450" role="img" aria-label={title} class="art" data-mobile-art="vision">
+  <defs>
+    <clipPath id="vision-frame">
+      <rect x="150" y="52" width="320" height="330" rx="6" />
+    </clipPath>
+  </defs>
+
+  <!-- viewfinder brackets -->
+  <g class="brackets">
+    <path d="M150 92 v-34 a6 6 0 0 1 6 -6 h34" />
+    <path d="M430 52 h34 a6 6 0 0 1 6 6 v34" />
+    <path d="M470 342 v34 a6 6 0 0 1 -6 6 h-34" />
+    <path d="M190 382 h-34 a6 6 0 0 1 -6 -6 v-34" />
+  </g>
+
+  <!-- robot head -->
+  <g class="head">
+    <rect x="218" y="84" width="184" height="220" rx="58" class="skull" />
+    <rect x="262" y="304" width="96" height="26" rx="10" class="neck" />
+    <circle cx="272" cy="176" r="15" class="eye" />
+    <circle cx="348" cy="176" r="15" class="eye" />
+    <circle cx="272" cy="176" r="5" class="pupil" />
+    <circle cx="348" cy="176" r="5" class="pupil" />
+    <rect x="284" y="238" width="52" height="10" rx="5" class="mouth" />
+    <line x1="310" y1="84" x2="310" y2="58" class="antenna" />
+    <circle cx="310" cy="52" r="5" class="antenna-tip" />
+  </g>
+
+  <!-- face mesh: lights as the beam passes -->
+  <g class="mesh">
+    {links.map(([a, b]) => (
+      <line x1={mesh[a][0]} y1={mesh[a][1]} x2={mesh[b][0]} y2={mesh[b][1]} class="mesh-link" data-anim />
+    ))}
+    {mesh.map(([x, y], i) => (
+      <circle cx={x} cy={y} r="3.4" class="mesh-node" style={`animation-delay: ${(y - 90) / 260 * 2.4}s`} data-anim />
+    ))}
+  </g>
+
+  <!-- scan beam (clipped to the viewfinder) -->
+  <g clip-path="url(#vision-frame)">
+    <g class="beam" data-anim>
+      <rect x="150" y="-26" width="320" height="26" class="beam-glow" />
+      <line x1="150" y1="0" x2="470" y2="0" class="beam-line" />
+    </g>
+  </g>
+
+  <!-- readout column -->
+  <g class="readout">
+    <rect x="520" y="70" width="230" height="150" rx="6" class="panel" />
+    <text x="540" y="102" class="mono state-scanning" data-anim>SCANNING ▄</text>
+    <text x="540" y="102" class="mono state-match" data-anim>MATCH · ENROLLED</text>
+    <line x1="540" y1="118" x2="730" y2="118" class="hair" />
+    <text x="540" y="146" class="mono ink2">SUBJECT: SYNTHETIC-01</text>
+    <text x="540" y="172" class="mono emotion" data-anim>EMOTION: HAPPY ▸</text>
+    <text x="540" y="198" class="mono ink2">MODEL: PRETRAINED</text>
+  </g>
+
+  <!-- the write: a row lands in both stores -->
+  <g class="stores">
+    <rect x="520" y="250" width="230" height="64" rx="6" class="panel" />
+    <text x="540" y="276" class="mono acc-deep">attendance.db</text>
+    <rect x="540" y="288" width="150" height="8" rx="3" class="write-row" data-anim />
+    <rect x="520" y="330" width="230" height="52" rx="6" class="panel" />
+    <text x="540" y="356" class="mono acc-deep">attendance_log.csv</text>
+    <rect x="540" y="364" width="120" height="6" rx="3" class="write-row csv" data-anim />
+  </g>
+
+  <text x="750" y="428" text-anchor="end" class="mono ink2">SYNTHETIC SUBJECT · NO REAL FACES OR ATTENDANCE DATA</text>
+</svg>
+
+<style>
+  .art { display: block; width: 100%; height: auto; background: var(--paper-2); }
+  .mono { font-family: var(--font-mono); font-size: 15px; letter-spacing: 0.04em; }
+  .ink2 { fill: var(--ink-2); }
+  .acc-deep { fill: var(--acc-vision-deep); }
+  .hair { stroke: var(--line); stroke-width: 1; }
+  .panel { fill: var(--paper); stroke: var(--line); stroke-width: 1; }
+
+  .brackets path { fill: none; stroke: var(--acc-vision); stroke-width: 2.5; }
+  .skull { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+  .neck { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+  .eye { fill: var(--paper-2); stroke: var(--ink); stroke-width: 2; }
+  .pupil { fill: var(--acc-vision); }
+  .mouth { fill: none; stroke: var(--ink); stroke-width: 2; }
+  .antenna { stroke: var(--ink); stroke-width: 2; }
+  .antenna-tip { fill: var(--acc-vision); }
+
+  .mesh-link { stroke: var(--acc-vision); stroke-width: 1; opacity: 0.22; }
+  .mesh-node {
+    fill: var(--acc-vision-deep);
+    opacity: 0.25;
+    animation: node-ping 4.8s var(--ease-ui) infinite;
+  }
+  @keyframes node-ping {
+    0%, 18% { opacity: 0.25; }
+    26%, 34% { opacity: 1; }
+    46%, 100% { opacity: 0.35; }
+  }
+
+  .beam { animation: beam-sweep 4.8s var(--ease-ui) infinite; }
+  @keyframes beam-sweep {
+    0% { transform: translateY(52px); }
+    58% { transform: translateY(382px); }
+    100% { transform: translateY(52px); }
+  }
+  .beam-line { stroke: var(--acc-vision); stroke-width: 2.5; }
+  .beam-glow { fill: var(--acc-vision); opacity: 0.1; }
+
+  .state-scanning { fill: var(--acc-vision-deep); animation: show-scan 4.8s step-end infinite; }
+  .state-match { fill: var(--acc-vision-deep); animation: show-match 4.8s step-end infinite; }
+  @keyframes show-scan { 0% { opacity: 1; } 60% { opacity: 0; } 100% { opacity: 1; } }
+  @keyframes show-match { 0% { opacity: 0; } 60% { opacity: 1; } 100% { opacity: 0; } }
+  .emotion { animation: emotion-in 4.8s var(--ease-ui) infinite; }
+  @keyframes emotion-in {
+    0%, 58% { opacity: 0.35; }
+    66%, 100% { opacity: 1; }
+  }
+
+  .write-row {
+    fill: var(--acc-vision);
+    opacity: 0.35;
+    transform-origin: left center;
+    transform: scaleX(0.12);
+    animation: row-write 4.8s var(--ease-out) infinite;
+  }
+  .write-row.csv { animation-delay: 0.18s; }
+  @keyframes row-write {
+    0%, 60% { transform: scaleX(0.12); opacity: 0.35; }
+    72%, 96% { transform: scaleX(1); opacity: 1; }
+    100% { transform: scaleX(0.12); opacity: 0.35; }
+  }
+
+  @media (prefers-reduced-motion: reduce), (max-width: 1023px), (pointer: coarse), (hover: none) {
+    .beam, .mesh-node, .state-scanning, .state-match, .emotion, .write-row {
+      animation: none;
+    }
+    .beam { transform: translateY(217px); }
+    .state-scanning { opacity: 0; }
+    .mesh-node { opacity: 0.8; }
+    .write-row { transform: scaleX(1); opacity: 1; }
+  }
+</style>

@@ -1,0 +1,684 @@
+---
+/* THE INDEX — five projects, all of them visible at once.
+   ----------------------------------------------------------------------------
+   This replaces two earlier attempts that were wrong the same way: both showed
+   ONE project at a time. First five full-screen panels stacked in a row, then a
+   pinned stage that dissolved between them. Both made the reader scroll to
+   discover what work exists — backwards for an index, whose whole job is to let
+   someone take in the body of work at a glance and choose. The pinned version
+   also collided outright: its absolutely-positioned rail printed its numbers
+   straight through the project's own body copy.
+
+   So: an editorial index. Five hairline rows, all five legible without
+   scrolling, each a single clickable row carrying position, title, one-liner
+   and stack. Beside it a sticky viewer holds the artwork and cross-fades to
+   whichever row is being pointed at or read.
+
+   Two rules this layout keeps that the last one broke:
+     - Words and particles never share space. Copy sits in a scrimmed column,
+       artwork sits in a glass panel, and nothing is absolutely positioned over
+       running text.
+     - One link per row, accessible name intact: the title anchor is stretched
+       across the row instead of nesting more links inside it.
+   -------------------------------------------------------------------------- */
+import { support } from "../../content/work/support";
+import { vision } from "../../content/work/vision";
+import { simiutopia } from "../../content/work/simiutopia";
+import { subways } from "../../content/work/subways";
+import { classforge } from "../../content/work/classforge";
+import SupportArt from "../art/SupportArt.astro";
+import VisionArt from "../art/VisionArt.astro";
+import SimiArt from "../art/SimiArt.astro";
+import SubwaysArt from "../art/SubwaysArt.astro";
+import ClassForgeArt from "../art/ClassForgeArt.astro";
+
+// locked work-index copy for the four; ClassForge's is its facts-mined oneLiner
+const lines: Record<string, string> = {
+  support:
+    "A B2B support platform with four roles, realtime updates, and auth that can take permission back.",
+  vision:
+    "A webcam pipeline that recognizes enrolled faces and logs attendance to SQLite and CSV.",
+  simiutopia:
+    "A team-built city simulation. My commits: one continuous vehicle movement model, and save files that restore honestly.",
+  subways:
+    "A metro-building strategy game where every move must clear card, route, and geometry rules.",
+  classforge: classforge.oneLiner,
+};
+const kinds: Record<string, string> = {
+  support: "Full-stack SaaS",
+  vision: "Computer vision",
+  simiutopia: "Java · Simulation",
+  subways: "Game logic",
+  classforge: "Java desktop",
+};
+
+const projects = [support, vision, simiutopia, subways, classforge];
+const previewNames: Record<string, string> = {
+  support: "Customer Support", vision: "Face Recognition", simiutopia: "Simiutopia",
+  subways: "Subways", classforge: "ClassForge",
+};
+---
+
+<section id="work" class="work" aria-labelledby="work-heading">
+  <div class="container">
+    {/* the section's kicker IS its heading — level is semantics, size is CSS */}
+    <h2 id="work-heading" class="label" data-reveal="label">
+      <span>Selected work</span><span class="label-rule"></span>
+    </h2>
+
+    <div class="work-grid" data-index>
+      {/* One set of SVGs serves both layouts. Mobile gets explicit controls;
+          desktop keeps its pointer/focus-driven preview beside the index. */}
+      <div class="viewer">
+        <div class="viewer-controls" role="group" aria-label="Choose a project preview">
+          <p class="viewer-instruction">Explore the projects</p>
+          <div class="viewer-buttons">
+            {projects.map((p, i) => (
+              <button type="button" data-preview-project={p.slug} data-accent={p.slug}
+                aria-pressed={i === 0 ? "true" : "false"} aria-controls="work-preview-stage">
+                {previewNames[p.slug]}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div id="work-preview-stage" class="viewer-stage glass" aria-hidden="true">
+          {
+            projects.map((p, i) => (
+              <div class={`work-art${i === 0 ? " is-live" : ""}`} data-art={p.slug}>
+                {p.slug === "support" && <SupportArt />}
+                {p.slug === "vision" && <VisionArt />}
+                {p.slug === "simiutopia" && <SimiArt />}
+                {p.slug === "subways" && <SubwaysArt />}
+                {p.slug === "classforge" && <ClassForgeArt />}
+              </div>
+            ))
+          }
+        </div>
+        <a class="viewer-project" data-preview-link href={`/work/${support.slug}`}>
+          <span data-preview-title>{support.title}</span>
+          <span class="viewer-open">View project <span aria-hidden="true">↗</span></span>
+        </a>
+        <p class="viewer-cap t-mono-s">Reconstruction, drawn from the codebase</p>
+      </div>
+      <ol class="rows">
+        {
+          projects.map((p, i) => (
+            <li
+              class="row"
+              data-project={p.slug}
+              data-accent={p.slug}
+              data-reveal
+            >
+              {/* this project's waypoint for the world, one per row */}
+              <i class="row-anchor" data-world={String(i + 1)} aria-hidden="true" />
+
+              <span class="row-pos t-mono" aria-hidden="true">{p.position}</span>
+
+              <span class="row-main">
+                <h3 class="row-title">
+                  <a href={`/work/${p.slug}`} class="row-link">{p.title}</a>
+                </h3>
+                <span class="row-line">{lines[p.slug]}</span>
+                <span class="row-stack t-mono-s">
+                  {p.stack.slice(0, 5).join(" · ")}
+                  {p.stack.length > 5 && <span class="row-more"> +{p.stack.length - 5}</span>}
+                </span>
+              </span>
+
+              <span class="row-meta">
+                <span class="row-kind t-mono-s">{kinds[p.slug]}</span>
+                {/* lifted above the stretched link so it stays its own target */}
+                <a href={p.repoHref} class="row-src t-mono-s" rel="noopener">
+                  Source<span class="visually-hidden"> code for {p.title} on GitHub</span>
+                  <span aria-hidden="true"> ↗</span>
+                </a>
+                <span class="row-go" aria-hidden="true">→</span>
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  let disposeIndex: (() => void) | undefined;
+  function initIndex() {
+    const grid = document.querySelector<HTMLElement>("[data-index]");
+    if (!grid || grid.dataset.wired) return;
+    grid.dataset.wired = "1";
+
+    const rows = Array.from(grid.querySelectorAll<HTMLElement>(".row"));
+    const arts = Array.from(grid.querySelectorAll<HTMLElement>(".work-art"));
+    const controls = Array.from(grid.querySelectorAll<HTMLButtonElement>("[data-preview-project]"));
+    const previewLink = grid.querySelector<HTMLAnchorElement>("[data-preview-link]");
+    const previewTitle = grid.querySelector<HTMLElement>("[data-preview-title]");
+    const compact = matchMedia("(max-width: 1023px)");
+    if (!rows.length) return;
+    let disposed = false;
+
+    let active = -1;
+    let hovered = -1;
+    let queued = 0;
+    let visible = false;
+    let chosen = false;
+
+    const setActive = (i: number) => {
+      if (i === active || i < 0) return;
+      active = i;
+      rows.forEach((r, k) => r.classList.toggle("is-active", k === i));
+      arts.forEach((a, k) => a.classList.toggle("is-live", k === i));
+      controls.forEach((button, k) => button.setAttribute("aria-pressed", String(k === i)));
+      const link = rows[i]?.querySelector<HTMLAnchorElement>(".row-link");
+      if (previewLink && link) previewLink.setAttribute("href", link.getAttribute("href")!);
+      if (previewTitle && link) previewTitle.textContent = link.textContent;
+    };
+
+    controls.forEach((button, i) => button.addEventListener("click", () => {
+      chosen = true;
+      setActive(i);
+    }));
+
+    /* pointing at a row wins; otherwise the row nearest the reading line does */
+    rows.forEach((r, i) => {
+      r.addEventListener("pointerenter", () => {
+        if (compact.matches || !matchMedia("(hover: hover)").matches) return;
+        hovered = i;
+        setActive(i);
+      });
+      r.addEventListener("pointerleave", () => {
+        if (hovered === i) hovered = -1;
+        schedule();
+      });
+      r.addEventListener("focusin", () => setActive(i));
+    });
+
+    /* The rows do not move, so their centres are measured once and the scroll
+       loop is pure arithmetic. Reading getBoundingClientRect for every row on
+       every scrolled frame forces five layout flushes per frame — the exact
+       shape of jank, and worst on the phones this most needs to be smooth on. */
+    let centres: number[] = [];
+    const measure = () => {
+      if (disposed) return;
+      const top = window.scrollY;
+      centres = rows.map((r) => {
+        const b = r.getBoundingClientRect();
+        return b.top + top + b.height / 2;
+      });
+    };
+    measure();
+
+    const update = () => {
+      queued = 0;
+      if (disposed || !visible) return;
+      if (hovered >= 0 || !centres.length || (compact.matches && chosen)) return;
+      const y = window.scrollY;
+      // the reading line sits a little above centre, where the eye actually is
+      const line = y + window.innerHeight * 0.42;
+      let best = 0;
+      let bestD = Infinity;
+      for (let i = 0; i < centres.length; i++) {
+        const d = Math.abs(centres[i] - line);
+        if (d < bestD) {
+          bestD = d;
+          best = i;
+        }
+      }
+      setActive(best);
+    };
+    const schedule = () => {
+      if (!queued && visible && !disposed) queued = requestAnimationFrame(update);
+    };
+    const remeasure = () => { if (!compact.matches) chosen = false; measure(); schedule(); };
+    window.addEventListener("resize", remeasure, { passive: true });
+    // Wrapping changes row heights when the webfont lands.
+    document.fonts?.ready.then(remeasure).catch(() => {});
+    window.addEventListener("scroll", schedule, { passive: true });
+    const visibility = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      grid.toggleAttribute("data-preview-visible", visible);
+      if (visible) schedule();
+    });
+    visibility.observe(grid);
+
+    if (active < 0) setActive(0);
+    disposeIndex = () => {
+      disposed = true;
+      cancelAnimationFrame(queued);
+      visibility.disconnect();
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", remeasure);
+      delete grid.dataset.previewVisible;
+      delete grid.dataset.wired;
+      disposeIndex = undefined;
+    };
+  }
+
+  initIndex();
+  document.addEventListener("astro:page-load", initIndex);
+  document.addEventListener("astro:before-swap", () => disposeIndex?.());
+</script>
+
+<style>
+  .work {
+    position: relative;
+    padding-top: var(--space-section);
+  }
+  /* THE SECTION'S GROUND.
+     The sculpture sits centre-right of the viewport — exactly where the meta
+     column and the viewer are. A per-row gradient that faded out at 62% left
+     the kind, source and caption text being read straight through dense
+     particles, plus a hard vertical edge mid-row. This is one wash across the
+     whole section instead: the world stays as texture behind the index and
+     stops competing with it, which is the site's own rule — the world gets out
+     of the way where there is prose to read. */
+  .work::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      color-mix(in srgb, var(--void) 86%, transparent) 6%,
+      color-mix(in srgb, var(--void) 86%, transparent) 94%,
+      transparent
+    );
+  }
+  .work-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+  }
+
+  /* ============================== the rows ============================== */
+  .rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: var(--hairline) solid var(--line-2);
+  }
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-3) var(--space-5);
+    align-items: start;
+    padding-block: var(--space-4);
+    border-bottom: var(--hairline) solid var(--line-2);
+    /* the accent wash that arrives with the pointer */
+    background-image: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--acc) 9%, transparent),
+      transparent 62%
+    );
+    background-repeat: no-repeat;
+    background-size: 0% 100%;
+    transition: background-size 620ms var(--ease-out-expo);
+  }
+  .row.is-active {
+    background-size: 100% 100%;
+  }
+  .row-anchor {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 1px;
+    height: 1px;
+  }
+  .row-pos {
+    color: var(--ink-3);
+    font-size: var(--text-body-s);
+    padding-top: 0.4em;
+    transition: color var(--dur-medium) var(--ease-smooth);
+  }
+  .row.is-active .row-pos {
+    color: var(--acc);
+  }
+
+  .row-main {
+    display: block;
+    min-width: 0;
+  }
+  .row-title {
+    font-family: var(--font-display);
+    /* h3 scale, deliberately: at h2 the five rows ran 1350px and the last two
+       fell below the fold, which defeated the one thing this layout exists to
+       do — show the whole body of work at a glance */
+    font-size: var(--text-h3);
+    line-height: 1.15;
+    letter-spacing: var(--track-display);
+    margin: 0 0 var(--space-2);
+  }
+  .row-link {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  /* ONE link, stretched over the row: the whole row is clickable and the link
+     keeps its real accessible name (the project title) */
+  .row-link::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .row-link:focus-visible {
+    outline: var(--rule-strong) solid var(--acc);
+    outline-offset: 6px;
+  }
+
+  .row-line {
+    display: block;
+    color: var(--ink-2);
+    font-size: var(--text-body-s);
+    line-height: 1.55;
+    max-width: 56ch;
+    margin-bottom: var(--space-2);
+    text-wrap: pretty;
+  }
+  .row-stack {
+    display: block;
+    color: var(--ink-3);
+    text-transform: uppercase;
+  }
+  .row-more {
+    color: var(--acc);
+  }
+  /* Day is a light ground, and the base accents are tuned for the dark one. At
+     11.5px, measured against #edebe5, simiutopia came out at 3.36:1 and
+     classforge at 4.20:1 — both under the 4.5 AA needs for body text. The deep
+     variant exists for exactly this and clears it. */
+  :global(html[data-mode="day"]) .row-more,
+  :global(html[data-mode="day"]) .row.is-active .row-pos,
+  :global(html[data-mode="day"]) .row-src {
+    color: var(--acc-deep);
+  }
+
+  .row-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-3);
+    text-align: right;
+    padding-top: 0.4em;
+  }
+  .row-kind {
+    color: var(--ink-3);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .row-src {
+    position: relative;
+    z-index: 1; /* above the stretched link */
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    color: var(--ink-3);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color var(--dur-fast) var(--ease-smooth);
+  }
+  .row-src:hover,
+  .row-src:focus-visible {
+    color: var(--acc);
+  }
+  .row-go {
+    color: var(--acc);
+    font-size: var(--text-h3);
+    line-height: 1;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition:
+      opacity var(--dur-medium) var(--ease-smooth),
+      transform 560ms var(--ease-out-expo);
+  }
+  .row.is-active .row-go {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ============================= the viewer ============================== */
+  .viewer {
+    position: relative;
+    min-width: 0;
+  }
+  .viewer-controls,
+  .viewer-project { display: none; }
+  .viewer-stage {
+    position: relative;
+    /* These artworks are technical diagrams — hairlines and 11px mono. Left on
+       plain glass the particle field showed straight through and the labels
+       went muddy, so the stage carries its own near-opaque ground. */
+    background: color-mix(in srgb, var(--void) 93%, transparent);
+    /* every artwork is 800x450, so the panel is reserved at that ratio and a
+       swap can never shift the page */
+    aspect-ratio: 800 / 450;
+    padding: var(--space-4);
+    overflow: hidden;
+  }
+  .work-art {
+    position: absolute;
+    inset: var(--space-4);
+    opacity: 0;
+    transform: scale(0.985);
+    transition:
+      opacity 420ms var(--ease-smooth),
+      transform 620ms var(--ease-out-expo);
+  }
+  .work-art.is-live {
+    opacity: 1;
+    transform: none;
+  }
+  .work-art :global(svg) {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .work-art :global(*) {
+    animation-play-state: paused;
+  }
+  [data-preview-visible] .work-art.is-live :global(*) {
+    animation-play-state: running;
+  }
+  .viewer-cap {
+    position: relative;
+    margin: var(--space-3) 0 0;
+    color: var(--ink-3);
+    text-transform: uppercase;
+  }
+
+  /* ============================== desktop ================================ */
+  @media (min-width: 1024px) {
+    .work-grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      grid-template-areas: "rows viewer";
+      gap: var(--space-7);
+      align-items: start;
+    }
+    .viewer {
+      grid-area: viewer;
+      position: sticky;
+      top: 18vh; /* clear of the floating navigation */
+    }
+    .row {
+      padding-block: var(--space-4);
+    }
+    .rows { grid-area: rows; }
+  }
+
+  /* =============================== phones ================================ */
+  @media (max-width: 1023px) {
+    /* A normal-flow preview lets touch visitors see every artwork without
+       pinning a large panel over the reading viewport or duplicating SVG IDs. */
+    .viewer {
+      margin-bottom: var(--space-4);
+    }
+    .work {
+      padding-top: var(--space-7);
+    }
+    .work-grid {
+      display: flex;
+      flex-direction: column;
+      margin-top: var(--space-4);
+      gap: var(--space-4);
+    }
+    .viewer-controls { display: block; margin-bottom: var(--space-3); }
+    .viewer-instruction { color: var(--ink-2); font-size: var(--text-body-s); margin-bottom: var(--space-2); }
+    .viewer-buttons { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
+    .viewer-buttons button {
+      min-height: 44px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      padding: var(--space-2) 0;
+      background: transparent;
+      font: inherit;
+      font-size: var(--text-body-s);
+      text-align: left;
+      color: var(--ink-2);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .viewer-buttons button[aria-pressed="true"] { color: var(--acc-deep); border-bottom-color: var(--acc); }
+    .viewer-buttons button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    .viewer-stage { padding: 0; }
+    .work-art { inset: 0; transition: opacity 140ms ease-out; transform: none; }
+    .viewer-project {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-3);
+      min-height: 48px;
+      padding-block: var(--space-2);
+      color: var(--ink);
+      text-decoration: none;
+      font-size: var(--text-body-s);
+    }
+    .viewer-open { flex: none; color: var(--ink-2); }
+    .viewer-cap { font-size: .68rem; line-height: 1.5; margin-top: var(--space-1); }
+    :global(html.no-js) .viewer-controls { display: none; }
+    .viewer-project:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    .viewer-project:active { opacity: .75; }
+    .viewer-open span { display: inline-block; }
+    @media (hover: hover) {
+      .viewer-project:hover .viewer-open span { transform: translate(2px, -2px); }
+    }
+
+    .row {
+      display: block;
+      padding-block: var(--space-4);
+      background-image: none;
+    }
+    /* the number and its tick read as the card's header line */
+    .row-pos {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding-top: 0;
+      margin-bottom: var(--space-2);
+      font-size: var(--text-mono-s);
+      color: var(--acc);
+    }
+    .row-pos::after {
+      content: "";
+      width: 28px;
+      height: var(--rule-strong);
+      background: color-mix(in srgb, var(--acc) 55%, transparent);
+    }
+    .row-title {
+      font-size: 1.3rem;
+      line-height: 1.2;
+      margin-bottom: var(--space-2);
+    }
+    .row-line {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: var(--space-3);
+      /* two lines, so every card is the same shape and four fit a screen; the
+         full sentence is on the replay */
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      overflow: hidden;
+    }
+    /* Wraps rather than truncates. Clipping this line to one row put the
+       ellipsis exactly where the "+7" lives, so the card silently lost the fact
+       that the stack continues — the one piece of information the count exists
+       to carry. */
+    .row-stack {
+      font-size: 0.68rem;
+      line-height: 1.6;
+    }
+    /* kind and source share one footer line */
+    .row-meta {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-4);
+      text-align: left;
+      padding-top: 0;
+      margin-top: 0;
+    }
+    /* the source link should look like the link it is */
+    .row-src {
+      color: var(--acc);
+    }
+    .row-go {
+      display: none;
+    }
+    /* a tap should answer immediately — on touch there is no hover to confirm
+       the press landed */
+    .row:active {
+      background-color: color-mix(in srgb, var(--acc) 8%, transparent);
+    }
+    /* Touch has no hover, so the row being read is marked instead.
+       The mark lives in the gutter, NOT inside the row's box. As an inset
+       box-shadow it was painted at x=0 — and the text starts at x=0 too, so the
+       bar ran straight through the first character of every line: through the
+       "01", the "C" of Customer, the "N" of NEXT.JS. Michael caught it as a
+       blue line across the words. Sitting it outside the content edge keeps the
+       rows aligned with the section label and leaves the text untouched. */
+    .row.is-active {
+      box-shadow: none;
+    }
+    .row.is-active::before {
+      content: "";
+      position: absolute;
+      left: -10px;
+      top: var(--space-3);
+      bottom: var(--space-3);
+      width: 2px;
+      border-radius: 2px;
+      background: var(--acc);
+      pointer-events: none;
+    }
+    .row.is-active .row-title {
+      color: var(--ink);
+    }
+  }
+
+  /* very narrow phones: give the words the whole width back */
+  @media (max-width: 400px) {
+    .row-title {
+      font-size: 1.18rem;
+    }
+    .row-meta {
+      gap: var(--space-3);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .row,
+    .row-go,
+    .work-art,
+    .row-pos {
+      transition: none;
+    }
+    .work-art {
+      transform: none;
+    }
+  }
+</style>

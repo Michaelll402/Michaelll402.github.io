@@ -1,0 +1,66 @@
+{
+  "width": 336,
+  "height": 256,
+  "colorSpace": "srgb-linear",
+  "mapping": 306,
+  "type": 1016,
+  "minFilter": 1006,
+  "magFilter": 1006,
+  "flipY": false,
+  "threeRevision": "185",
+  "faceSize": 64,
+  "format": "RGBA half-float little-endian",
+  "compression": "gzip",
+  "byteLength": 688128,
+  "compressedBytes": 103975,
+  "sha256": "10bd9b18e7b4a6fa8c293ed84d748a054433dc7b773ff818ec3eaa982c986ed6",
+  "compressedSha256": "623091a061a6261c2e3a47af342239861d119104a35e20cf0a97a95b58238364",
+  "source": "Original portfolio three-plane studio environment, PMREM sigma 0.04",
+  "recipe": {
+    "background": "#04050a",
+    "near": 0.1,
+    "far": 100,
+    "sigma": 0.04,
+    "planes": [
+      {
+        "color": "#cfe0ff",
+        "power": 2.6,
+        "position": [
+          3,
+          3,
+          2
+        ],
+        "size": [
+          6,
+          6
+        ]
+      },
+      {
+        "color": "#ffb680",
+        "power": 1.3,
+        "position": [
+          -4,
+          -1,
+          1
+        ],
+        "size": [
+          5,
+          5
+        ]
+      },
+      {
+        "color": "#7f9cff",
+        "power": 0.9,
+        "position": [
+          0,
+          -4,
+          -3
+        ],
+        "size": [
+          8,
+          3
+        ]
+      }
+    ]
+  }
+}

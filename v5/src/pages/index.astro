@@ -1,0 +1,63 @@
+---
+import Base from "../layouts/Base.astro";
+import Hero from "../components/home/Hero.astro";
+import Dossier from "../components/home/Dossier.astro";
+import WorkSequence from "../components/home/WorkSequence.astro";
+import Craft from "../components/home/Craft.astro";
+import Path from "../components/home/Path.astro";
+import About from "../components/home/About.astro";
+import Contact from "../components/home/Contact.astro";
+---
+
+<Base
+  title="Michael Tawfik | Full-Stack Software Engineer Portfolio"
+  description="Official portfolio of Michael Tawfik, a full-stack software engineer specializing in TypeScript, React and Node.js. View my latest projects and work history."
+  ogImage="home"
+  ogAlt="Portfolio of Michael Tawfik, full-stack software engineer in Budapest"
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "Michael Tawfik",
+    givenName: "Michael",
+    familyName: "Tawfik",
+    jobTitle: "Full-Stack Software Engineer",
+    description:
+      "Full-stack software engineer in Budapest, studying Computer Science at ELTE and graduating in July 2027.",
+    url: "https://michaelll402.github.io/",
+    image: "https://michaelll402.github.io/og/home.png",
+    email: "mailto:michaeltawfik2004@gmail.com",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Budapest",
+      addressRegion: "Budapest",
+      addressCountry: "HU",
+    },
+    alumniOf: { "@type": "CollegeOrUniversity", name: "Eötvös Loránd University (ELTE)" },
+    // every one of these is a skill listed in docs/facts — nothing aspirational
+    knowsAbout: [
+      "TypeScript",
+      "JavaScript",
+      "React",
+      "Next.js",
+      "Node.js",
+      "NestJS",
+      "Express",
+      "PostgreSQL",
+      "Prisma",
+      "Python",
+      "Java",
+      "Docker",
+      "REST APIs",
+      "Full-stack web development",
+    ],
+    sameAs: ["https://github.com/Michaelll402", "https://www.linkedin.com/in/michaeltawfik4"],
+  }}
+>
+  <Hero />
+  <Dossier />
+  <WorkSequence />
+  <Path />
+  <Craft />
+  <About />
+  <Contact />
+</Base>

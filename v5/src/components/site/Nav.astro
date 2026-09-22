@@ -1,0 +1,891 @@
+---
+import ModeSwitch from "./ModeSwitch.astro";
+const isCase = Astro.url.pathname.startsWith("/work");
+
+/* Each section carries its own mark, the way an iOS tab group does. Monoline,
+   drawn to one grid, stroked in currentColor so they inherit the selected and
+   unselected states instead of needing their own. */
+const items = [
+  {
+    label: "Projects",
+    href: "/#work",
+    id: "work",
+    // stacked surfaces
+    d: "M12 3.4 20.2 7.6 12 11.8 3.8 7.6 12 3.4Z M3.8 12.1 12 16.3l8.2-4.2 M3.8 16.3 12 20.5l8.2-4.2",
+    f: "M12 3.4 20.2 7.6 12 11.8 3.8 7.6 12 3.4Z M3.8 11.3 12 15.5l8.2-4.2 1.6.8L12 17.3 2.2 12.1l1.6-.8Z M3.8 15.5 12 19.7l8.2-4.2 1.6.8L12 21.5 2.2 16.3l1.6-.8Z",
+  },
+  {
+    label: "Experience",
+    href: "/#path",
+    id: "path",
+    // a case with a handle
+    d: "M3.6 8.8h16.8v10.6H3.6Z M9 8.8V6.7a1.4 1.4 0 0 1 1.4-1.4h3.2a1.4 1.4 0 0 1 1.4 1.4v2.1 M3.6 13.3h16.8 M10.9 12.4h2.2v1.9h-2.2Z",
+    f: "M3.6 8.8h16.8v10.6H3.6Z M9 8.8V6.7a1.4 1.4 0 0 1 1.4-1.4h3.2a1.4 1.4 0 0 1 1.4 1.4v2.1",
+  },
+  {
+    label: "Skills",
+    href: "/#craft",
+    id: "craft",
+    // a chip with pins
+    d: "M8.6 8.6h6.8v6.8H8.6Z M10.4 3.7v2.9 M13.6 3.7v2.9 M10.4 17.4v2.9 M13.6 17.4v2.9 M3.7 10.4h2.9 M3.7 13.6h2.9 M17.4 10.4h2.9 M17.4 13.6h2.9",
+    f: "M8.6 8.6h6.8v6.8H8.6Z M10.4 3.7v2.9 M13.6 3.7v2.9 M10.4 17.4v2.9 M13.6 17.4v2.9 M3.7 10.4h2.9 M3.7 13.6h2.9 M17.4 10.4h2.9 M17.4 13.6h2.9",
+  },
+  {
+    label: "About",
+    href: "/#about",
+    id: "about",
+    // a person
+    d: "M12 12.3a3.65 3.65 0 1 0 0-7.3 3.65 3.65 0 0 0 0 7.3Z M4.9 20.3a7.1 7.1 0 0 1 14.2 0v.6H4.9Z",
+    f: "M12 12.3a3.65 3.65 0 1 0 0-7.3 3.65 3.65 0 0 0 0 7.3Z M4.9 20.3a7.1 7.1 0 0 1 14.2 0v.6H4.9Z",
+  },
+];
+
+---
+
+<header class="nav" data-nav>
+  <!-- The colour the glass has to bend. Four slow lights, one per project,
+       drifting behind the pods — a translucent material with nothing behind it
+       reads as flat grey plastic, which is the difference between glass and a
+       picture of glass. -->
+  {/* The veil. The navigation is fixed, so every section eventually scrolls
+      underneath it — and the pods are small capsules, so what passed behind
+      them came out sliced: half a word visible beside a circle. Michael caught
+      it on "JAVA · SIMULATION". This is a soft ground that fades content out as
+      it reaches the top edge, so text leaves the screen instead of being cut.
+      It only exists once the page has scrolled, so the hero opens untouched. */}
+  <div class="nav-veil" aria-hidden="true"></div>
+
+  <div class="nav-aura" aria-hidden="true">
+    <i class="aura a1"></i><i class="aura a2"></i><i class="aura a3"></i><i class="aura a4"></i>
+  </div>
+
+  <div class="nav-inner">
+    <!-- pod 1: the name -->
+    <a href="/" class="pod pod-mark" data-pod data-magnetic>
+      <span class="pod-spec" aria-hidden="true"></span>
+      <span class="mark-glyph" aria-hidden="true">MT</span>
+      <span class="mark-name">Michael Tawfik</span>
+    </a>
+
+    <!-- pod 2: the sections, with the selection riding inside the group's glass -->
+    <nav class="pod pod-links" aria-label="Sections" data-pod data-nav-group>
+      <span class="pod-spec" aria-hidden="true"></span>
+      <span class="pod-sel" data-nav-sel aria-hidden="true"></span>
+      {
+        items.map((it) => (
+          <a href={it.href} class="nav-link t-mono-s" data-nav-target={it.id}>
+            <svg class="nav-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path class="ico-line" d={it.d} />
+              <path class="ico-fill" d={it.f} />
+            </svg>
+            <span>{it.label}</span>
+          </a>
+        ))
+      }
+    </nav>
+
+    <!-- pod 3: detached controls, the way iOS keeps search off the tab group -->
+    <div class="pod pod-ctrl" data-pod>
+      <span class="pod-spec" aria-hidden="true"></span>
+      <ModeSwitch />
+      <span class="pod-divider" aria-hidden="true"></span>
+      <a class="ctrl-cta t-mono-s" href={isCase ? "/#contact" : "#contact"}>Contact</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===========================================================================
+     THE DOCK — phones only.
+     On a phone the top of the screen is the furthest thing from your thumb, so
+     that is the worst possible place to put navigation. iOS moved its own
+     controls to a floating bar above the home indicator for exactly this
+     reason, and that is what this is: the same glass, in the thumb zone, above
+     the safe area, hiding when you scroll down and returning the moment you
+     scroll up.
+     =========================================================================== -->
+<div class="dock" data-dock aria-hidden="false">
+  <!-- the dock's own light. Glass over a flat dark page is grey plastic; this is
+       what it bends. -->
+  <div class="dock-aura" aria-hidden="true">
+    <i class="aura a1"></i><i class="aura a2"></i><i class="aura a3"></i><i class="aura a4"></i>
+  </div>
+  <nav class="pod dock-pod" aria-label="Sections" data-pod data-nav-group>
+    <span class="pod-spec" aria-hidden="true"></span>
+    <span class="pod-sel dock-sel" data-nav-sel aria-hidden="true"></span>
+    {
+      items.map((it) => (
+        <a href={it.href} class="dock-link" data-nav-target={it.id}>
+          <svg class="dock-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path class="ico-line" d={it.d} />
+            <path class="ico-fill" d={it.f} />
+          </svg>
+          <span class="dock-label">{it.label}</span>
+        </a>
+      ))
+    }
+  </nav>
+  <a class="pod dock-cta" href={isCase ? "/#contact" : "#contact"} aria-label="Contact Michael">
+    <span class="pod-spec" aria-hidden="true"></span>
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M3.5 6.5h17v11h-17zM3.5 7 12 13l8.5-6" />
+    </svg>
+  </a>
+</div>
+
+<script>
+  import { onFrame } from "../../lib/clock";
+  import { damp } from "../../webgl/store";
+
+  let disposeNav: (() => void) | undefined;
+  function initNav() {
+    const nav = document.querySelector<HTMLElement>("[data-nav]");
+    if (!nav || nav.dataset.wired) return;
+    nav.dataset.wired = "1";
+    const disposers: Array<() => void> = [];
+    const listen = (target: EventTarget, type: string, handler: EventListener) => {
+      target.addEventListener(type, handler, { passive: true });
+      disposers.push(() => target.removeEventListener(type, handler));
+    };
+    disposeNav = () => {
+      disposers.forEach((dispose) => dispose());
+      delete nav.dataset.wired;
+      disposeNav = undefined;
+    };
+
+    let scrolled: boolean | undefined;
+    const onScroll = () => {
+      const next = window.scrollY > 24;
+      if (next === scrolled) return;
+      scrolled = next;
+      nav.toggleAttribute("data-scrolled", next);
+    };
+    onScroll();
+    listen(window, "scroll", onScroll);
+
+    /* Each pod is a separate piece of glass, so each gets its own specular.
+       Fine pointers only — a phone has no cursor to track. */
+    if (matchMedia("(pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.querySelectorAll<HTMLElement>("[data-pod]").forEach((pod) => {
+        const p = { x: 50, y: 50, tx: 50, ty: 50, on: 0, ton: 0 };
+        let box = { left: 0, top: 0, w: 1, h: 1 };
+        let stop: (() => void) | undefined;
+        const wake = () => {
+          if (stop) return;
+          stop = onFrame((dt) => {
+            p.x = damp(p.x, p.tx, 10, dt);
+            p.y = damp(p.y, p.ty, 10, dt);
+            p.on = damp(p.on, p.ton, 12, dt);
+            pod.style.setProperty("--sx", p.x.toFixed(1) + "%");
+            pod.style.setProperty("--sy", p.y.toFixed(1) + "%");
+            pod.style.setProperty("--son", p.on.toFixed(3));
+            if (Math.abs(p.x - p.tx) < .05 && Math.abs(p.y - p.ty) < .05 && Math.abs(p.on - p.ton) < .002) {
+              pod.style.setProperty("--son", String(p.ton));
+              stop?.();
+              stop = undefined;
+            }
+          });
+        };
+        disposers.push(() => stop?.());
+        pod.addEventListener("pointerenter", () => {
+          const r = pod.getBoundingClientRect();
+          box = { left: r.left, top: r.top, w: Math.max(1, r.width), h: Math.max(1, r.height) };
+          p.ton = 1;
+          wake();
+        });
+        pod.addEventListener("pointerleave", () => {
+          p.ton = 0;
+          wake();
+        });
+        pod.addEventListener("pointermove", (e) => {
+          p.tx = ((e.clientX - box.left) / box.w) * 100;
+          p.ty = ((e.clientY - box.top) / box.h) * 100;
+          wake();
+        });
+      });
+    }
+
+    const allLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-nav-target]"));
+
+    // These are ordinary anchors. ClientRouter owns hash changes, history
+    // indices and scroll restoration, including modified clicks and Back.
+
+    /* Section changes, not an endless frame subscription, move the shared
+       selection. Hidden desktop/mobile groups do not measure or animate. */
+    const groups = Array.from(document.querySelectorAll<HTMLElement>("[data-nav-group]")).map(
+      (group) => {
+        const sel = group.querySelector<HTMLElement>("[data-nav-sel]");
+        const links = Array.from(group.querySelectorAll<HTMLAnchorElement>("[data-nav-target]"));
+        const measure = (el: HTMLElement) => {
+          if (!sel || !group.offsetWidth) return;
+          sel.style.width = `${el.offsetWidth}px`;
+          sel.style.transform = `translate3d(${el.offsetLeft}px,0,0)`;
+          sel.style.opacity = "1";
+        };
+        return { links, measure, clear: () => { if (sel) sel.style.opacity = "0"; } };
+      }
+    );
+
+    const setCurrent = (id: string) => {
+      allLinks.forEach((l) =>
+        l.dataset.navTarget === id ? l.setAttribute("aria-current", "true") : l.removeAttribute("aria-current")
+      );
+      groups.forEach((g) => {
+        const link = g.links.find((l) => l.dataset.navTarget === id);
+        if (link) g.measure(link);
+      });
+    };
+    /* The hero and the contact section belong to no tab. Without clearing, the
+       slab kept whatever was lit last — standing at Contact with "Skills"
+       glowing, which reads as a wrong answer. Outside the four sections the
+       selection simply withdraws. */
+    const clearCurrent = () => {
+      allLinks.forEach((l) => l.removeAttribute("aria-current"));
+      groups.forEach((g) => g.clear());
+    };
+
+    let currentId = "";
+    const spy = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => {
+          if (!en.isIntersecting) return;
+          if (en.target.id === currentId) return;
+          currentId = en.target.id;
+          if (currentId === "hero" || currentId === "contact") clearCurrent();
+          else setCurrent(currentId);
+        });
+      },
+      { rootMargin: "-45% 0px -45% 0px" }
+    );
+    disposers.push(() => spy.disconnect());
+    const seen = new Set<string>();
+    allLinks.forEach((l) => {
+      const id = l.dataset.navTarget!;
+      if (seen.has(id)) return;
+      seen.add(id);
+      const el = document.getElementById(id);
+      if (el) spy.observe(el);
+    });
+    // the two untabbed regions are watched too, so the slab can stand down
+    for (const id of ["hero", "contact"]) {
+      const el = document.getElementById(id);
+      if (el) spy.observe(el);
+    }
+    listen(window, "resize", () => { if (currentId) setCurrent(currentId); });
+
+    /* The dock gets out of the way while you are reading and comes back the
+       instant you reach for it — the behaviour iOS uses for the same bar. It
+       never hides near the bottom of the page, where the contact form is. */
+    const dock = document.querySelector<HTMLElement>("[data-dock]");
+    if (dock) {
+      let lastY = window.scrollY;
+      let hidden = false;
+      listen(window,
+        "scroll",
+        () => {
+          const y = window.scrollY;
+          const dy = y - lastY;
+          if (Math.abs(dy) < 6) return;
+          lastY = y;
+          const nearEnd = y + window.innerHeight > document.body.scrollHeight - 260;
+          const wantHidden = dy > 0 && y > 320 && !nearEnd;
+          if (wantHidden === hidden) return;
+          hidden = wantHidden;
+          dock.toggleAttribute("data-hidden", hidden);
+        }
+      );
+    }
+  }
+
+  initNav();
+  document.addEventListener("astro:page-load", initNav);
+  document.addEventListener("astro:before-swap", () => disposeNav?.());
+</script>
+
+<style>
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-header);
+    pointer-events: none;
+  }
+  .nav-inner {
+    pointer-events: none;
+    width: min(100% - var(--gutter) * 2, var(--container));
+    margin-inline: auto;
+    min-height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-top: var(--space-3);
+  }
+
+  .nav-veil {
+    position: absolute;
+    inset: 0 0 auto;
+    height: calc(var(--header-h) + 56px);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 420ms var(--ease-smooth);
+    /* Fully opaque through the band the pods occupy — at 90% the words behind
+       the capsules were still legible, which reads as a rendering fault rather
+       than as content leaving the screen. It only softens below them. */
+    background: linear-gradient(
+      to bottom,
+      var(--void) 0%,
+      var(--void) 52%,
+      color-mix(in srgb, var(--void) 62%, transparent) 76%,
+      transparent 100%
+    );
+  }
+  .nav[data-scrolled] .nav-veil {
+    opacity: 1;
+  }
+  @media (max-width: 1023px) {
+    .nav-veil {
+      height: calc(var(--header-h-mobile) + env(safe-area-inset-top, 0px) + 46px);
+    }
+  }
+
+  /* ------------------------------------------------------------- the aura */
+  .nav-aura {
+    position: absolute;
+    inset: 0 0 auto;
+    height: calc(var(--header-h) + 44px);
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 900ms var(--ease-smooth);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 32%, transparent 92%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 32%, transparent 92%);
+  }
+  .nav[data-scrolled] .nav-aura {
+    opacity: 1;
+  }
+  .aura {
+    position: absolute;
+    top: -120%;
+    width: 34vw;
+    height: 340%;
+    border-radius: 50%;
+    opacity: 0.26;
+    will-change: transform;
+  }
+  .a1 { left: -4vw; background: radial-gradient(closest-side, var(--acc-support), transparent 72%); animation: aura-a 34s var(--ease-in-out) infinite alternate; }
+  .a2 { left: 22vw; background: radial-gradient(closest-side, var(--acc-vision), transparent 72%); animation: aura-b 41s var(--ease-in-out) infinite alternate; }
+  .a3 { left: 50vw; background: radial-gradient(closest-side, var(--acc-simiutopia), transparent 72%); animation: aura-a 47s var(--ease-in-out) infinite alternate -12s; }
+  .a4 { left: 74vw; background: radial-gradient(closest-side, var(--acc-subways), transparent 72%); animation: aura-b 38s var(--ease-in-out) infinite alternate -20s; }
+  @keyframes aura-a {
+    from { transform: translate3d(-5vw, 0, 0) scale(1); }
+    to { transform: translate3d(6vw, 0, 0) scale(1.25); }
+  }
+  @keyframes aura-b {
+    from { transform: translate3d(5vw, 0, 0) scale(1.2); }
+    to { transform: translate3d(-6vw, 0, 0) scale(0.92); }
+  }
+  :global(html[data-mode="day"]) .aura {
+    /* transmissive glass needs something to transmit */
+    opacity: 0.34;
+  }
+
+  /* -------------------------------------------------------------- the pods */
+  .pod {
+    position: relative;
+    pointer-events: auto;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    text-decoration: none;
+    color: var(--ink);
+    background:
+      linear-gradient(168deg, color-mix(in srgb, var(--ink) 12%, transparent), transparent 58%),
+      color-mix(in srgb, var(--void) 52%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(1.9);
+    backdrop-filter: blur(18px) saturate(1.9);
+    border: var(--hairline) solid color-mix(in srgb, var(--ink) 14%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--ink) 26%, transparent),
+      inset 1px 0 0 color-mix(in srgb, var(--ink) 12%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, var(--void) 55%, transparent),
+      0 14px 34px -22px rgba(0, 0, 0, 0.8);
+    transition:
+      border-color var(--dur-medium) var(--ease-smooth),
+      transform var(--dur-medium) var(--ease-out-expo);
+  }
+  @supports (backdrop-filter: url(#liquid-glass)) {
+    .nav[data-scrolled] .pod,
+    .dock .pod {
+      -webkit-backdrop-filter: blur(15px) saturate(2) url(#liquid-glass);
+      backdrop-filter: blur(15px) saturate(2) url(#liquid-glass);
+    }
+  }
+
+  /* THE LENS. iOS 26's material is not "blur plus white" — its defining trait is
+     that the RIM behaves like the thick edge of a real lens: everything under it
+     is brightened and over-saturated, which is what makes the shape read as a
+     solid object rather than a painted rectangle. */
+  .pod::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    border: 2.5px solid transparent;
+    -webkit-backdrop-filter: brightness(1.22) saturate(1.9);
+    backdrop-filter: brightness(1.22) saturate(1.9);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .pod-spec {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: var(--son, 0);
+    background: radial-gradient(
+      9rem 4rem at var(--sx, 50%) var(--sy, 50%),
+      color-mix(in srgb, var(--ink) 30%, transparent),
+      transparent 70%
+    );
+  }
+
+  /* DAY is its own material. The pod used to be 95% opaque white — a painted
+     shape, not glass. It is now genuinely transmissive: the colour behind bleeds
+     up through it and the rim carries the light. */
+  :global(html[data-mode="day"]) .pod {
+    background:
+      linear-gradient(168deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.2) 58%),
+      rgba(255, 255, 255, 0.24);
+    -webkit-backdrop-filter: blur(24px) saturate(2.8) brightness(1.06);
+    backdrop-filter: blur(24px) saturate(2.8) brightness(1.06);
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow:
+      inset 0 1.5px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -3px 8px -3px rgba(20, 20, 26, 0.14),
+      0 10px 26px -18px rgba(20, 20, 26, 0.4);
+  }
+  :global(html[data-mode="day"]) .pod::after {
+    -webkit-backdrop-filter: brightness(1.12) saturate(2.2);
+    backdrop-filter: brightness(1.12) saturate(2.2);
+  }
+  :global(html[data-mode="day"]) .pod-spec {
+    background: radial-gradient(
+      9rem 4rem at var(--sx, 50%) var(--sy, 50%),
+      rgba(255, 255, 255, 0.9),
+      transparent 70%
+    );
+  }
+
+  /* ---- pod 1: the name ---- */
+  .pod-mark {
+    gap: var(--space-3);
+    padding: 7px 16px 7px 7px;
+  }
+  .mark-glyph {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    letter-spacing: 0.08em;
+    padding: 6px 9px;
+    border-radius: 999px;
+    color: var(--void);
+    background: var(--ink);
+  }
+  .mark-name {
+    font-family: var(--font-display);
+    font-size: var(--text-body);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .pod-mark:hover {
+    transform: translateY(-1px);
+  }
+
+  /* ---- pod 2: the sections ---- */
+  .pod-links {
+    gap: 2px;
+    padding: 5px;
+  }
+  /* the visible chip is 33px so the pill keeps its proportions; the hit area
+     is extended past it rather than the design being resized around a number */
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    inset: -6px -2px;
+  }
+  .nav-link {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 999px;
+    white-space: nowrap;
+    transition:
+      color var(--dur-medium) var(--ease-smooth),
+      background-color var(--dur-medium) var(--ease-smooth);
+  }
+  /* Two marks per section, cross-faded: outlined when the tab is not selected,
+     solid when it is. That swap is how iOS distinguishes the active tab, and it
+     does more work than any colour change can. */
+  .nav-ico,
+  .dock-ico {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.55;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .ico-line,
+  .ico-fill {
+    transition: opacity var(--dur-medium) var(--ease-smooth);
+  }
+  .ico-fill {
+    fill: currentColor;
+    stroke-width: 1.1;
+    opacity: 0;
+  }
+  [aria-current] .ico-line {
+    opacity: 0;
+  }
+  [aria-current] .ico-fill {
+    opacity: 1;
+  }
+  .nav-ico {
+    width: 15px;
+    height: 15px;
+    flex: none;
+    opacity: 0.9;
+  }
+  /* Hover is deliberately NOT the selected look. It used to move the selection
+     slab, so pointing at a section made it appear chosen. */
+  .nav-link:hover {
+    color: var(--ink-2);
+    background: color-mix(in srgb, var(--ink) 7%, transparent);
+  }
+  .nav-link[aria-current] {
+    color: var(--ink);
+  }
+  .nav-link[aria-current] .nav-ico {
+    opacity: 1;
+  }
+  .nav-link[aria-current]:hover {
+    background: transparent;
+  }
+  :global(html[data-mode="day"]) .nav-link:hover {
+    background: rgba(255, 255, 255, 0.55);
+  }
+
+  .pod-sel {
+    position: absolute;
+    left: 0;
+    top: 5px;
+    bottom: 5px;
+    width: 0;
+    opacity: 0;
+    border-radius: 999px;
+    pointer-events: none;
+    transform-origin: center;
+    background: color-mix(in srgb, var(--ink) 13%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--ink) 30%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, var(--void) 35%, transparent);
+    transition: transform 260ms var(--ease-out-expo), opacity 180ms var(--ease-smooth);
+  }
+  :global(html[data-mode="day"]) .pod-sel {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      0 2px 8px -3px rgba(20, 20, 26, 0.3);
+  }
+
+  /* ---- pod 3: the controls ---- */
+  .pod-ctrl {
+    gap: var(--space-3);
+    padding: 5px 6px 5px 9px;
+  }
+  .pod-divider {
+    width: var(--hairline);
+    align-self: stretch;
+    margin-block: 6px;
+    background: color-mix(in srgb, var(--ink) 16%, transparent);
+  }
+  .ctrl-cta {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink);
+    padding: 0 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+    transition: background-color var(--dur-medium) var(--ease-smooth);
+  }
+  .ctrl-cta:hover {
+    background: color-mix(in srgb, var(--ink) 12%, transparent);
+  }
+  :global(html[data-mode="day"]) .ctrl-cta:hover {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  /* ======================================================================
+     THE DOCK — the phone's real navigation
+     ====================================================================== */
+  .dock {
+    display: none;
+  }
+  @media (max-width: 1099px) {
+    .pod-links {
+      display: none;
+    }
+    .nav-inner {
+      min-height: var(--header-h-mobile);
+      /* the top bar keeps only the name and the mode switch; everything else
+         moved to the thumb */
+      padding-top: max(var(--space-2), env(safe-area-inset-top));
+    }
+    .mark-name {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .pod-mark {
+      padding: 6px;
+    }
+    .ctrl-cta {
+      display: none;
+    }
+    .pod-divider {
+      display: none;
+    }
+    .pod-ctrl {
+      padding: 5px;
+    }
+
+    .dock-aura {
+      position: absolute;
+      /* was -10px on each side, which reached past the viewport edge */
+      inset: -26px 0 -18px;
+      pointer-events: none;
+      overflow: hidden;
+      border-radius: 40px;
+      -webkit-mask-image: radial-gradient(120% 90% at 50% 60%, #000 30%, transparent 78%);
+      mask-image: radial-gradient(120% 90% at 50% 60%, #000 30%, transparent 78%);
+    }
+    .dock-aura .aura {
+      top: -60%;
+      height: 220%;
+      width: 46%;
+      opacity: 0.34;
+    }
+    .dock-aura .a1 { left: -8%; }
+    .dock-aura .a2 { left: 20%; }
+    .dock-aura .a3 { left: 48%; }
+    .dock-aura .a4 { left: 74%; }
+    :global(html[data-mode="day"]) .dock-aura .aura {
+      opacity: 0.4;
+    }
+
+    .dock {
+      display: flex;
+      position: fixed;
+      z-index: var(--z-header);
+      left: 0;
+      right: 0;
+      /* above the home indicator, never under it */
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      padding-inline: 12px;
+      pointer-events: none;
+      transition:
+        transform 520ms var(--ease-out-expo),
+        opacity 320ms var(--ease-smooth);
+    }
+    .dock[data-hidden] {
+      transform: translateY(calc(100% + env(safe-area-inset-bottom, 0px) + 20px));
+      opacity: 0;
+    }
+    .dock-pod,
+    .dock-cta {
+      /* thicker glass than the desktop pods: on a phone this bar is the chrome
+         you look at constantly, so it earns the extra depth */
+      -webkit-backdrop-filter: blur(26px) saturate(2.4) brightness(1.08);
+      backdrop-filter: blur(26px) saturate(2.4) brightness(1.08);
+      box-shadow:
+        inset 0 1.5px 0 color-mix(in srgb, var(--ink) 34%, transparent),
+        inset 0 -2px 6px -2px color-mix(in srgb, var(--void) 70%, transparent),
+        0 18px 40px -18px rgba(0, 0, 0, 0.85),
+        0 2px 10px -4px rgba(0, 0, 0, 0.5);
+      /* Navigation is usable with the first paint, including on route changes. */
+    }
+    :global(html[data-mode="day"]) .dock-pod,
+    :global(html[data-mode="day"]) .dock-cta {
+      -webkit-backdrop-filter: blur(28px) saturate(3) brightness(1.05);
+      backdrop-filter: blur(28px) saturate(3) brightness(1.05);
+      box-shadow:
+        inset 0 1.5px 0 rgba(255, 255, 255, 1),
+        inset 0 -3px 8px -3px rgba(20, 20, 26, 0.16),
+        0 14px 34px -18px rgba(20, 20, 26, 0.45);
+    }
+    @keyframes dock-in {
+      from { transform: translateY(18px) scale(0.94); opacity: 0; }
+      to { transform: none; opacity: 1; }
+    }
+    .dock-pod {
+      flex: 1 1 auto;
+      min-width: 0;
+      justify-content: space-between;
+      padding: 6px;
+      gap: 2px;
+    }
+    .dock-link {
+      position: relative;
+      z-index: 1;
+      flex: 1 1 0;
+      min-width: 0;
+      padding-inline: 2px;
+      /* Apple's minimum is 44pt and this is the primary navigation on the
+         device most recruiters will use, so it is not negotiable */
+      min-height: 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      border-radius: 999px;
+      text-decoration: none;
+      color: var(--ink-3);
+      transition: color var(--dur-medium) var(--ease-smooth);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dock-ico {
+      width: 21px;
+      height: 21px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform var(--dur-medium) var(--ease-out-expo);
+    }
+    .dock-label {
+      font-family: var(--font-mono);
+      /* the longest label is EXPERIENCE; at 9.5px with 0.06em tracking it did
+         not survive a 375px screen, so both come down a touch */
+      font-size: 9.5px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+    .dock-link[aria-current] {
+      color: var(--ink);
+    }
+    .dock-link[aria-current] .dock-ico {
+      transform: translateY(-1px) scale(1.06);
+    }
+    /* touch has no hover, so the feedback is on press */
+    .dock-link:active .dock-ico {
+      transform: scale(0.9);
+    }
+    .dock-sel {
+      top: 6px;
+      bottom: 6px;
+    }
+    .dock-cta {
+      flex: none;
+      width: 54px;
+      height: 54px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      color: var(--ink);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dock-cta svg {
+      position: relative;
+      z-index: 1;
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform var(--dur-medium) var(--ease-out-expo);
+    }
+    .dock-cta:active svg {
+      transform: scale(0.9);
+    }
+  }
+
+  /* 360px is a real and common Android width, and "Experience" still clipped
+     there at 9.5px — so the label steps down before the layout does */
+  @media (max-width: 379px) {
+    .dock-label {
+      font-size: 9px;
+      letter-spacing: 0;
+    }
+  }
+
+  /* below that, labels would truncate to nonsense whatever the size: drop to marks */
+  @media (max-width: 339px) {
+    .dock-label {
+      display: none;
+    }
+    .dock-link {
+      min-height: 48px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aura {
+      animation: none;
+    }
+    .pod,
+    .pod-sel,
+    .dock {
+      transition: none;
+    }
+  }
+
+  /* Live backdrop sampling competes with native scrolling on phones. Keep the
+     same rim, gradient and depth using a stable material instead. */
+  @media (pointer: coarse), (hover: none), (max-width: 1023px) {
+    .aura {
+      animation: none;
+      will-change: auto;
+    }
+    :global(html[data-mode]) :is(.nav, .dock) .pod,
+    :global(html[data-mode]) :is(.nav, .dock) .pod::after,
+    :global(html[data-mode]) .nav[data-scrolled] .pod {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    :global(html[data-mode]) :is(.nav, .dock) .pod {
+      background:
+        linear-gradient(168deg, color-mix(in srgb, var(--ink) 11%, transparent), transparent 58%),
+        color-mix(in srgb, var(--void) 96%, transparent);
+    }
+    .pod-sel { transition-duration: 160ms; }
+  }
+</style>

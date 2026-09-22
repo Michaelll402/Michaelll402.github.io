@@ -1,0 +1,130 @@
+---
+// §15 v4.2 LIVING RECONSTRUCTION — the movement model, driving.
+// The vehicle actually drives the L-route on the real path geometry
+// (CSS offset-path with offset-rotate: the tangent IS the rotation),
+// slowing through the quadratic corner exactly as the model describes.
+// Honest to docs/facts/simiutopia.md: commit 06355a4, 16-sample curve.
+interface Props {
+  title?: string;
+}
+const { title = "Living reconstruction of the movement model: a vehicle drives the L-route, rotating with the path tangent and slowing through the quadratic corner; 16 sample points mark the curve-length approximation." } = Astro.props;
+
+const P0 = { x: 90, y: 130 };
+const P1 = { x: 440, y: 130 };
+const C = { x: 560, y: 130 };
+const P2 = { x: 560, y: 250 };
+const P3 = { x: 560, y: 380 };
+const ROUTE = `M${P0.x} ${P0.y} L${P1.x} ${P1.y} Q${C.x} ${C.y} ${P2.x} ${P2.y} L${P3.x} ${P3.y}`;
+const samples = Array.from({ length: 16 }, (_, i) => {
+  const t = (i + 1) / 17;
+  const x = (1 - t) ** 2 * P1.x + 2 * (1 - t) * t * C.x + t ** 2 * P2.x;
+  const y = (1 - t) ** 2 * P1.y + 2 * (1 - t) * t * C.y + t ** 2 * P2.y;
+  return { x, y };
+});
+---
+
+<svg viewBox="0 0 800 450" role="img" aria-label={title} class="art" data-mobile-art="simiutopia">
+  <!-- tile grid -->
+  {Array.from({ length: 7 }, (_, i) => <line x1={90 + i * 94} y1="60" x2={90 + i * 94} y2="410" class="grid" />)}
+  {Array.from({ length: 4 }, (_, i) => <line x1="60" y1={60 + i * 94} x2="740" y2={60 + i * 94} class="grid" />)}
+
+  <!-- the path -->
+  <path d={ROUTE} class="route" />
+
+  <!-- waypoints -->
+  <rect x={P0.x - 8} y={P0.y - 8} width="16" height="16" class="stop" />
+  <rect x={P3.x - 8} y={P3.y - 8} width="16" height="16" class="stop" />
+  <text x={P0.x - 8} y={P0.y - 20} class="mono ink2">STOP A</text>
+  <text x={P3.x + 20} y={P3.y + 5} class="mono ink2">STOP B</text>
+
+  <!-- 16 curve-length samples -->
+  {samples.map((s, i) => (
+    <circle cx={s.x} cy={s.y} r="3" class="sample" style={`animation-delay: ${i * 0.12}s`} data-anim />
+  ))}
+  <text x="596" y="196" class="mono ink2">16 SAMPLES ≈ LENGTH</text>
+
+  <!-- the vehicle: driven by the path itself -->
+  <g class="vehicle-rig" style={`offset-path: path('${ROUTE}')`} data-anim>
+    <rect x="-18" y="-11" width="36" height="22" rx="3" class="vehicle" />
+    <line x1="18" y1="0" x2="58" y2="0" class="tangent" />
+    <path d="M58 0 l-9 -4 v8 z" class="tangent-head" />
+  </g>
+
+  <!-- model annotations -->
+  <text x="120" y="205" class="mono acc-deep">POSITION(d) · TANGENT(d) · SPEED(d)</text>
+  <text x="120" y="230" class="mono ink2">MODEL AND RENDERER ASK THE SAME PATH</text>
+  <g>
+    <text x="120" y="300" class="mono speed-fast" data-anim>SPEED SCALE 1.00</text>
+    <text x="120" y="300" class="mono speed-slow" data-anim>SPEED SCALE 0.62 · CURVE ZONE</text>
+  </g>
+</svg>
+
+<style>
+  .art { display: block; width: 100%; height: auto; background: var(--paper-2); }
+  .mono { font-family: var(--font-mono); font-size: 15px; letter-spacing: 0.04em; }
+  .ink2 { fill: var(--ink-2); }
+  .acc-deep { fill: var(--acc-simiutopia-deep); }
+  .grid { stroke: var(--line); stroke-width: 1; }
+  .route { fill: none; stroke: var(--acc-simiutopia); stroke-width: 3; }
+  .stop { fill: var(--paper-2); stroke: var(--ink); stroke-width: 2; }
+  .sample {
+    fill: var(--acc-simiutopia-deep);
+    opacity: 0.4;
+    animation: sample-shimmer 9s var(--ease-ui) infinite;
+  }
+  @keyframes sample-shimmer {
+    0%, 30% { opacity: 0.4; }
+    36% { opacity: 1; }
+    44%, 100% { opacity: 0.4; }
+  }
+
+  .vehicle { fill: var(--ink); }
+  .tangent { stroke: var(--acc-simiutopia-deep); stroke-width: 2; }
+  .tangent-head { fill: var(--acc-simiutopia-deep); }
+  /* the drive: eased through the corner window (35%→65%) to read as braking */
+  .vehicle-rig {
+    offset-rotate: auto;
+    offset-distance: 0%;
+    animation: drive 9s infinite;
+    animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+  }
+  @keyframes drive {
+    0% { offset-distance: 0%; opacity: 0; }
+    3% { opacity: 1; }
+    35% { offset-distance: 52%; }
+    65% { offset-distance: 72%; }
+    95% { offset-distance: 100%; opacity: 1; }
+    100% { offset-distance: 100%; opacity: 0; }
+  }
+
+  .speed-fast { fill: var(--acc-simiutopia-deep); animation: speed-a 9s step-end infinite; }
+  .speed-slow { fill: var(--acc-simiutopia-deep); animation: speed-b 9s step-end infinite; }
+  @keyframes speed-a {
+    0% { opacity: 1; }
+    35% { opacity: 0; }
+    65% { opacity: 1; }
+  }
+  @keyframes speed-b {
+    0% { opacity: 0; }
+    35% { opacity: 1; }
+    65% { opacity: 0; }
+  }
+
+  /* The mobile driver samples this exact path once, then lets native transform
+     animation move the vehicle. No offset-distance or per-frame JS on touch. */
+  .art[data-mobile-motion] .vehicle-rig {
+    offset-path: none !important;
+    offset-distance: 0%;
+    transform-origin: 0 0;
+    transform-box: view-box;
+  }
+
+  @media (prefers-reduced-motion: reduce), (max-width: 1023px), (pointer: coarse), (hover: none) {
+    .vehicle-rig, .sample, .speed-fast, .speed-slow {
+      animation: none;
+    }
+    .vehicle-rig { offset-distance: 58%; opacity: 1; }
+    .sample { opacity: 0.8; }
+    .speed-slow { opacity: 0; }
+  }
+</style>

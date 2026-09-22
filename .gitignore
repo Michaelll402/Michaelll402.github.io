@@ -1,0 +1,13 @@
+# Keep local credentials and build output out of future release commits.
+.env
+.env.*
+!.env.example
+*.tfstate
+*.tfstate.*
+*.pem
+*.p12
+*.key
+node_modules/
+dist/
+.astro/
+*.log

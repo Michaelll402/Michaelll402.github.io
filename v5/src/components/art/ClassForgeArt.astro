@@ -1,0 +1,213 @@
+---
+// LIVING RECONSTRUCTION — the semantic editor, editing.
+// The exact example domain from ClassForge's own README: Student extends Person
+// (inheritance, hollow triangle), and `private List<Course> courses` suggesting
+// an association with Course carrying * multiplicity. The dashed edge is the
+// suggestion appearing and resolving — the README's signature interaction —
+// and the route is orthogonal, the way the ELK-driven planner routes.
+// Honest to docs/facts/classforge.md. No invented UI.
+interface Props {
+  title?: string;
+}
+const {
+  title = "Reconstruction of ClassForge editing a diagram: Student extends Person with an inheritance arrow; a field List<Course> suggests an association to Course with * multiplicity over an orthogonal route.",
+} = Astro.props;
+---
+
+<svg viewBox="0 0 800 450" role="img" aria-label={title} class="art" data-mobile-art="classforge">
+  <!-- canvas dot grid, the editor's ground -->
+  {
+    Array.from({ length: 13 }, (_, r) =>
+      Array.from({ length: 23 }, (_, c) => (
+        <circle cx={60 + c * 31} cy={40 + r * 31} r="1" class="dot" />
+      ))
+    )
+  }
+
+  <!-- ═══ Person (superclass) ═══ -->
+  <g class="card">
+    <rect x="330" y="52" width="180" height="86" rx="8" class="card-body" />
+    <rect x="330" y="52" width="180" height="30" rx="8" class="card-head" />
+    <rect x="330" y="74" width="180" height="8" class="card-head-sq" />
+    <text x="420" y="72" class="t-name" text-anchor="middle">Person</text>
+    <line x1="330" y1="82" x2="510" y2="82" class="card-rule" />
+    <text x="342" y="102" class="t-member"># name: String</text>
+    <text x="342" y="122" class="t-member">+ getName(): String</text>
+  </g>
+
+  <!-- inheritance: hollow triangle, orthogonal riser -->
+  <path d="M420 210 V158" class="edge" />
+  <path d="M420 140 L410 158 H430 Z" class="edge-tri" />
+
+  <!-- ═══ Student (subclass, selected) ═══ -->
+  <g class="card is-selected">
+    <rect x="316" y="210" width="208" height="118" rx="8" class="card-body" />
+    <rect x="316" y="210" width="208" height="30" rx="8" class="card-head sel" />
+    <rect x="316" y="232" width="208" height="8" class="card-head-sq sel" />
+    <text x="420" y="230" class="t-name sel" text-anchor="middle">Student</text>
+    <line x1="316" y1="240" x2="524" y2="240" class="card-rule" />
+    <text x="328" y="260" class="t-member">- neptun: String</text>
+    <text x="328" y="280" class="t-member t-hot">- courses: List&lt;Course&gt;</text>
+    <line x1="316" y1="292" x2="524" y2="292" class="card-rule" />
+    <text x="328" y="312" class="t-member">+ enrol(c: Course): void</text>
+    <!-- the connection handle the README describes dragging -->
+    <circle cx="524" cy="281" r="5.5" class="handle" />
+  </g>
+
+  <!-- ═══ Course ═══ -->
+  <g class="card">
+    <rect x="596" y="238" width="160" height="86" rx="8" class="card-body" />
+    <rect x="596" y="238" width="160" height="30" rx="8" class="card-head" />
+    <rect x="596" y="260" width="160" height="8" class="card-head-sq" />
+    <text x="676" y="258" class="t-name" text-anchor="middle">Course</text>
+    <line x1="596" y1="268" x2="756" y2="268" class="card-rule" />
+    <text x="608" y="288" class="t-member"># code: String</text>
+    <text x="608" y="308" class="t-member">+ credits(): int</text>
+  </g>
+
+  <!-- the suggested association: dashed while pending, resolving to solid -->
+  <path d="M524 281 H596" class="edge edge-suggest" />
+  <text x="580" y="272" class="t-mult" text-anchor="end">*</text>
+
+  <!-- the semantic suggestion chip, from the README's auto-suggest -->
+  <g class="chip">
+    <rect x="500" y="342" width="196" height="30" rx="15" class="chip-body" />
+    <circle cx="518" cy="357" r="4" class="chip-dot" />
+    <text x="530" y="361" class="t-chip">Suggest: association · *</text>
+  </g>
+
+  <!-- validation tick: the editor checking Java legality, per the README -->
+  <g class="check">
+    <rect x="60" y="342" width="220" height="30" rx="15" class="chip-body" />
+    <path d="M76 357 l5 5 9 -10" class="check-mark" />
+    <text x="98" y="361" class="t-chip">Inheritance legal: Student → Person</text>
+  </g>
+</svg>
+
+<style>
+  .art {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .dot {
+    fill: var(--line);
+  }
+  .card-body {
+    fill: var(--paper-2);
+    stroke: var(--line);
+    stroke-width: 1.4;
+  }
+  .card-head {
+    fill: color-mix(in srgb, var(--acc) 16%, transparent);
+  }
+  .card-head-sq {
+    fill: color-mix(in srgb, var(--acc) 16%, transparent);
+  }
+  .card-head.sel,
+  .card-head-sq.sel {
+    fill: color-mix(in srgb, var(--acc) 30%, transparent);
+  }
+  .card-rule {
+    stroke: var(--line);
+    stroke-width: 1.2;
+  }
+  .t-name {
+    font: 600 15px var(--font-mono);
+    fill: var(--ink);
+  }
+  .t-member {
+    font: 400 12.5px var(--font-mono);
+    fill: var(--ink-2);
+  }
+  .t-hot {
+    fill: var(--acc-deep);
+  }
+  .t-mult {
+    font: 500 14px var(--font-mono);
+    fill: var(--acc-deep);
+  }
+  .edge {
+    stroke: var(--ink-2);
+    stroke-width: 1.6;
+    fill: none;
+  }
+  .edge-tri {
+    fill: var(--paper-2);
+    stroke: var(--ink-2);
+    stroke-width: 1.6;
+  }
+  .handle {
+    fill: var(--acc);
+    stroke: var(--paper-2);
+    stroke-width: 2;
+  }
+  .is-selected .card-body {
+    stroke: var(--acc);
+    stroke-width: 1.8;
+  }
+  .chip-body {
+    fill: var(--paper-2);
+    stroke: var(--line);
+    stroke-width: 1.2;
+  }
+  .chip-dot {
+    fill: var(--acc);
+  }
+  .t-chip {
+    font: 400 12px var(--font-mono);
+    fill: var(--ink-2);
+  }
+  .check-mark {
+    stroke: var(--acc-deep);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* the suggestion resolving: dashed edge draws in, chip breathes once */
+  .edge-suggest {
+    stroke: var(--acc);
+    stroke-dasharray: 6 5;
+    animation: cf-suggest 3.6s var(--ease-smooth) infinite;
+  }
+  .chip {
+    transform-origin: 598px 357px;
+    animation: cf-chip 3.6s var(--ease-smooth) infinite;
+  }
+  .handle {
+    animation: cf-handle 3.6s var(--ease-smooth) infinite;
+  }
+  @keyframes cf-suggest {
+    0%, 18% { stroke-dashoffset: 72; opacity: 0; }
+    34%, 82% { stroke-dashoffset: 0; opacity: 1; }
+    100% { stroke-dashoffset: 0; opacity: 0; }
+  }
+  @keyframes cf-chip {
+    0%, 26% { opacity: 0; transform: translateY(4px); }
+    40%, 78% { opacity: 1; transform: translateY(0); }
+    92%, 100% { opacity: 0; transform: translateY(0); }
+  }
+  @keyframes cf-handle {
+    0%, 16% { transform: scale(1); }
+    24% { transform: scale(1.5); }
+    32%, 100% { transform: scale(1); }
+  }
+  .handle {
+    transform-origin: 524px 281px;
+  }
+  .art[data-mobile-motion] .edge-suggest {
+    transform-origin: 524px 281px;
+    transform-box: view-box;
+  }
+  @media (prefers-reduced-motion: reduce), (max-width: 1023px), (pointer: coarse), (hover: none) {
+    .edge-suggest,
+    .chip,
+    .handle {
+      animation: none;
+      opacity: 1;
+      stroke-dashoffset: 0;
+    }
+  }
+</style>

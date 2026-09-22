@@ -1,0 +1,27 @@
+---
+import manifest from '../../assets/world/poster-manifest.json';
+import landscapeNight from '../../assets/world/poster-landscape-night.webp?url';
+import landscapeDay from '../../assets/world/poster-landscape-day.webp?url';
+import portraitNight from '../../assets/world/poster-portrait-night.webp?url';
+import portraitDay from '../../assets/world/poster-portrait-day.webp?url';
+import MobileGalaxy from './MobileGalaxy.astro';
+
+interface Props { accent?: string }
+const preview = (name: string) => manifest.assets.find(asset => asset.name === name)!.preview.dataUri;
+// The small actual-render images are in this HTML, so neither a script nor an
+// image request gates the recognizable composition. CSS fetches only the full
+// image matching the active theme and viewport; it sharpens the same pixels.
+const css = `
+.world-fallback { --poster-preview: url("${preview('poster-landscape-night')}"); --poster-full: url("${landscapeNight}"); }
+html[data-mode="day"] .world-fallback { --poster-preview: url("${preview('poster-landscape-day')}"); --poster-full: url("${landscapeDay}"); }
+@media (max-aspect-ratio: 1/1) {
+  .world-fallback { --poster-preview: url("${preview('poster-portrait-night')}"); --poster-full: url("${portraitNight}"); }
+  html[data-mode="day"] .world-fallback { --poster-preview: url("${preview('poster-portrait-day')}"); --poster-full: url("${portraitDay}"); }
+}`;
+---
+<style is:inline set:html={css}></style>
+<div data-world-fallback class="world-fallback" aria-hidden="true">
+  <div class="world-preview"></div>
+  <div class="world-detail"></div>
+  <MobileGalaxy />
+</div>

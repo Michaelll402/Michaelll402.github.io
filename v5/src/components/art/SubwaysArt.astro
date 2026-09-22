@@ -1,0 +1,140 @@
+---
+// §15 v4.3 LIVING RECONSTRUCTION — a stylized real Budapest metro map.
+// The four true lines in their official colors (M1 yellow · M2 red · M3 blue ·
+// M4 green), the Danube between Buda and Pest, Deák tér where three lines meet —
+// and a train riding M4 across the river, scoring the game's Danube-crossing
+// bonus. Honest to docs/facts/subways.md: the game plays lines M1–M4 on a
+// 10×10 grid with Danube crossings in the score.
+interface Props {
+  title?: string;
+}
+const { title = "Stylized Budapest metro map: lines M1 to M4 in their real colors across the Danube, with a train crossing the river the way the game scores Danube crossings." } = Astro.props;
+
+const M4_PATH = "M175 385 C 240 355, 270 340, 310 315 C 360 283, 420 270, 480 265 L 615 250";
+---
+
+<svg viewBox="0 0 800 450" role="img" aria-label={title} class="art" data-mobile-art="subways">
+  <!-- the Danube -->
+  <path d="M300 20 C 290 120, 310 220, 285 320 C 275 370, 280 410, 275 440 L 315 440 C 320 400, 315 360, 325 310 C 348 214, 328 118, 338 20 Z" class="danube" />
+  <text x="150" y="60" class="mono ink2">BUDA</text>
+  <text x="600" y="60" class="mono ink2">PEST</text>
+
+  <!-- M1 · yellow (the Millennium line, NE from the center) -->
+  <path d="M368 196 L 640 88" class="line m1" />
+  <circle cx="435" cy="169" r="5" class="stop" />
+  <circle cx="510" cy="140" r="5" class="stop" />
+  <circle cx="580" cy="112" r="5" class="stop" />
+  <g class="badge" transform="translate(652,78)">
+    <circle r="13" class="badge-bg b1" />
+    <text y="5" text-anchor="middle" class="mono badge-txt">M1</text>
+  </g>
+
+  <!-- M2 · red (east–west, under the river) -->
+  <path d="M120 210 L 740 180" class="line m2" />
+  <circle cx="205" cy="206" r="5" class="stop" />
+  <circle cx="470" cy="193" r="5" class="stop" />
+  <circle cx="590" cy="187" r="5" class="stop" />
+  <circle cx="680" cy="183" r="5" class="stop" />
+  <g class="badge" transform="translate(105,222)">
+    <circle r="13" class="badge-bg b2" />
+    <text y="5" text-anchor="middle" class="mono badge-txt">M2</text>
+  </g>
+
+  <!-- M3 · blue (the Pest spine) -->
+  <path d="M520 45 C 470 110, 385 150, 380 200 C 376 260, 420 330, 445 415" class="line m3" />
+  <circle cx="470" cy="98" r="5" class="stop" />
+  <circle cx="392" cy="238" r="5" class="stop" />
+  <circle cx="428" cy="345" r="5" class="stop" />
+  <g class="badge" transform="translate(548,58)">
+    <circle r="13" class="badge-bg b3" />
+    <text y="5" text-anchor="middle" class="mono badge-txt">M3</text>
+  </g>
+
+  <!-- M4 · green (Kelenföld to Keleti, crossing the Danube) -->
+  <path d={M4_PATH} class="line m4" />
+  <circle cx="250" cy="349" r="5" class="stop" />
+  <circle cx="310" cy="315" r="5" class="stop" />
+  <circle cx="480" cy="265" r="5" class="stop" />
+  <g class="badge" transform="translate(160,398)">
+    <circle r="13" class="badge-bg b4" />
+    <text y="5" text-anchor="middle" class="mono badge-txt">M4</text>
+  </g>
+
+  <!-- Deák Ferenc tér: three lines meet -->
+  <g transform="translate(374,197)">
+    <circle r="9" class="interchange" />
+    <circle r="4" class="interchange-core" />
+  </g>
+  <text x="330" y="235" class="mono ink2">DEÁK TÉR</text>
+
+  <!-- the train, riding M4 across the river -->
+  <g class="train" style={`offset-path: path('${M4_PATH}')`} data-anim>
+    <rect x="-13" y="-7" width="26" height="14" rx="4" class="train-body" />
+  </g>
+  <g class="crossing-ping" data-anim>
+    <text x="230" y="290" class="mono ping-txt">DANUBE CROSSING +1</text>
+  </g>
+
+  <!-- scoring truth, from the rules (top strip, clear of the frame caption) -->
+  <text x="60" y="32" class="mono ink2">SCORING: DISTRICTS × BIGGEST DISTRICT + DANUBE CROSSINGS</text>
+  <text x="740" y="428" text-anchor="end" class="mono ink2">STYLIZED · THE GAME PLAYS M1–M4 ON A 10×10 GRID</text>
+</svg>
+
+<style>
+  .art { display: block; width: 100%; height: auto; background: var(--paper-2); }
+  .mono { font-family: var(--font-mono); font-size: 15px; letter-spacing: 0.04em; }
+  .ink2 { fill: var(--ink-2); }
+  .danube { fill: rgba(0, 92, 165, 0.14); }
+  .line { fill: none; stroke-width: 6; stroke-linecap: round; }
+  /* official Budapest line colors */
+  .m1 { stroke: #ffd800; }
+  .m2 { stroke: #e41f18; }
+  .m3 { stroke: #005ca5; }
+  .m4 { stroke: #4ca22f; }
+  .stop { fill: var(--paper-2); stroke: var(--ink); stroke-width: 2; }
+  .interchange { fill: var(--paper-2); stroke: var(--ink); stroke-width: 2.5; }
+  .interchange-core { fill: var(--ink); }
+  .badge-bg { stroke: var(--paper-2); stroke-width: 2; }
+  .b1 { fill: #ffd800; }
+  .b2 { fill: #e41f18; }
+  .b3 { fill: #005ca5; }
+  .b4 { fill: #4ca22f; }
+  .badge-txt { fill: #141414; font-size: 12px; font-weight: 500; }
+  .b2 + .badge-txt, .b3 + .badge-txt { fill: #ffffff; }
+
+  .train-body { fill: var(--ink); stroke: #4ca22f; stroke-width: 2; }
+  .train {
+    offset-rotate: auto;
+    offset-distance: 0%;
+    animation: ride 10s infinite cubic-bezier(0.45, 0, 0.55, 1);
+  }
+  @keyframes ride {
+    0% { offset-distance: 0%; opacity: 0; }
+    4% { opacity: 1; }
+    92% { offset-distance: 100%; opacity: 1; }
+    100% { offset-distance: 100%; opacity: 0; }
+  }
+  .ping-txt { fill: #4ca22f; font-weight: 500; }
+  .crossing-ping {
+    opacity: 0;
+    animation: ping 10s var(--ease-ui) infinite;
+  }
+  @keyframes ping {
+    0%, 24% { opacity: 0; transform: translateY(4px); }
+    30%, 48% { opacity: 1; transform: translateY(0); }
+    56%, 100% { opacity: 0; }
+  }
+
+  .art[data-mobile-motion] .train {
+    offset-path: none !important;
+    offset-distance: 0%;
+    transform-origin: 0 0;
+    transform-box: view-box;
+  }
+
+  @media (prefers-reduced-motion: reduce), (max-width: 1023px), (pointer: coarse), (hover: none) {
+    .train, .crossing-ping { animation: none; }
+    .train { offset-distance: 46%; opacity: 1; }
+    .crossing-ping { opacity: 1; transform: none; }
+  }
+</style>

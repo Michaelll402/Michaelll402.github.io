@@ -1,0 +1,55 @@
+---
+import { buildFormations } from '../../webgl/formations';
+
+// Build-time sampling of the SAME deterministic sculpture as desktop. No
+// geometry generator or 3D dependency is sent to a phone for these layers.
+const { targets, rnd } = buildFormations(176);
+const layers = [false, true].map(near => Array.from({ length: 176 }, (_, i) => {
+  const x = targets[0][i * 3], y = targets[0][i * 3 + 1], z = targets[0][i * 3 + 2];
+  const perspective = 1 / (1 - z / 8);
+  return { x: (x * perspective).toFixed(3), y: (-y * perspective).toFixed(3),
+    r: (.012 + rnd[i * 3 + 2] * .016).toFixed(3), z, bright: rnd[i * 3] > .75 };
+}).filter(point => (point.z >= 0) === near));
+// Batch identical-colour circles into static paths. The same stars need four
+// path nodes, not hundreds of independently styled SVG descendants per page.
+const circlePath = (point: (typeof layers)[number][number], scale = 1) => {
+  const radius = Number(point.r) * scale;
+  const r = radius.toFixed(3), diameter = (radius * 2).toFixed(3);
+  return `M${(Number(point.x) - radius).toFixed(3)},${point.y}a${r},${r},0,1,0,${diameter},0a${r},${r},0,1,0,-${diameter},0z`;
+};
+---
+<div class="mobile-galaxy" data-mobile-galaxy aria-hidden="true">
+  <div class="mobile-galaxy-depth" data-mobile-galaxy-depth>
+    {layers.map((stars, index) => (
+      <div class={`mobile-galaxy-layer mobile-galaxy-${index ? 'near' : 'far'}`}>
+        <svg viewBox="-3.6 -3.6 7.2 7.2" focusable="false">
+          <path d={stars.filter(star => star.bright).map(star => circlePath(star, 3)).join('')} opacity=".12" />
+          <path d={stars.map(star => circlePath(star)).join('')} />
+        </svg>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  /* Two bounded, independently composited planes. The complete poster never
+     moves or disappears; travelling particles supply depth above its light. */
+  .mobile-galaxy { display: none; position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .mobile-galaxy-depth {
+    position: absolute; left: 50%; top: 1%; width: min(136vw, 640px);
+    aspect-ratio: 1; transform: translate3d(-50%, 0, 0);
+  }
+  .mobile-galaxy-layer { position: absolute; inset: 0; transform-origin: 50% 50%; }
+  .mobile-galaxy-layer svg { display: block; width: 100%; height: 100%; fill: currentColor; }
+  .mobile-galaxy-near { color: var(--ink); opacity: .88; }
+  .mobile-galaxy-far { color: var(--acc); opacity: .68; }
+  @media (max-width: 1023px), (pointer: coarse) {
+    :global(html.js) .mobile-galaxy:not([data-disabled]) { display: block; }
+  }
+  @media (orientation: landscape) {
+    .mobile-galaxy-depth { left: 73%; top: -18%; width: min(72vw, 620px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(html.js) .mobile-galaxy { display: none; }
+  }
+</style>

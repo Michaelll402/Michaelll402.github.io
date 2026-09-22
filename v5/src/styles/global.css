@@ -1,0 +1,136 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./world.css";
+
+/* ---------- fonts (carried from v3: the type system was never the problem) --- */
+@font-face {
+  font-family: "Newsreader";
+  src: url("../assets/fonts/Newsreader-var.woff2") format("woff2");
+  font-weight: 400 700;
+  font-stretch: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Public Sans";
+  src: url("../assets/fonts/PublicSans-var.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+/* A metric-adjusted local stand-in for Public Sans. font-display: swap means
+   the fallback renders first; if its metrics differ, every wrapped line can
+   re-break when the webfont lands — measured as a stable CLS 0.023 on the
+   ClassForge hero, whose chips sat exactly on a wrap boundary. Arial scaled to
+   Public Sans's advance widths keeps the wrap points still. */
+@font-face {
+  font-family: "Public Sans Fallback";
+  src: local("Arial");
+  size-adjust: 105.5%;
+  ascent-override: 96%;
+  descent-override: 26%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("../assets/fonts/PlexMono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBM Plex Mono";
+  src: url("../assets/fonts/PlexMono-500.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@theme inline {
+  --color-*: initial;
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-line: var(--line);
+  --font-*: initial;
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+/* ---------------------------------------------------------------------- base */
+html {
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+  transition: background-color 200ms ease-out, color 200ms ease-out;
+}
+@media (max-width: 1023px), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  html { transition: none; }
+}
+body {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  overflow-x: hidden;
+}
+::selection {
+  background: var(--acc);
+  color: var(--void);
+}
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+h1, h2, h3, h4, p, figure, ul, ol {
+  margin: 0;
+}
+ul, ol {
+  padding: 0;
+  list-style: none;
+}
+
+/* ------------------------------------------------ primitives the case pages use
+   v4 owns the homepage outright; the case studies still speak some of v3's
+   vocabulary, so these survive — restated in v4's material language. */
+.raised {
+  background: var(--paper-2);
+  border: var(--hairline) solid var(--line);
+  border-radius: var(--radius-s);
+}
+.section-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+@media (min-width: 1024px) {
+  .section-grid {
+    grid-template-columns: 1fr 3fr;
+    gap: var(--space-8);
+  }
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  border: var(--hairline) solid var(--line);
+}
+.skip-link {
+  position: fixed;
+  top: var(--space-3);
+  left: var(--space-3);
+  z-index: var(--z-skip);
+  transform: translateY(calc(-100% - var(--space-8)));
+}
+.skip-link:focus-visible {
+  transform: none;
+}
+
+/* Lenis needs the document to keep its natural height */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto;
+}

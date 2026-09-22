@@ -1,0 +1,48 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Page not found · Michael Tawfik" noindex>
+  <div class="container nf">
+    <h1 class="t-display-2">There's no page here.</h1>
+    <p class="nf-body">
+      The address may be old or mistyped. Everything on this site is reachable from the case
+      studies or the homepage.
+    </p>
+    <nav aria-label="Recovery">
+      <ul class="nf-links">
+        <li><a href="/" class="link-mono">Home →</a></li>
+        <li><a href="/work/support" class="link-mono">Support SaaS →</a></li>
+        <li><a href="/work/vision" class="link-mono">Face Recognition →</a></li>
+        <li><a href="/work/simiutopia" class="link-mono">Simiutopia →</a></li>
+        <li><a href="/work/subways" class="link-mono">Subways →</a></li>
+        <li><a href="/work/classforge" class="link-mono">ClassForge →</a></li>
+      </ul>
+    </nav>
+  </div>
+</Base>
+
+<style>
+  .nf {
+    padding-block: var(--space-9);
+    max-width: var(--measure-wide);
+    margin-inline: 0;
+  }
+  .nf-body {
+    margin: var(--space-5) 0 var(--space-7);
+    max-width: var(--measure);
+  }
+  .nf-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4) var(--space-5);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .nf-links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+  }
+</style>

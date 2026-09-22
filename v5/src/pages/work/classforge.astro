@@ -1,0 +1,28 @@
+---
+import CaseLayout from "../../components/work/CaseLayout.astro";
+import Chapter from "../../components/work/Chapter.astro";
+import OmittedAside from "../../components/work/OmittedAside.astro";
+import ClassForgeArt from "../../components/art/ClassForgeArt.astro";
+import ClassForgeLayersArt from "../../components/art/ClassForgeLayersArt.astro";
+import { classforge } from "../../content/work/classforge";
+
+const ch = classforge.chapters;
+---
+
+<CaseLayout cs={classforge}>
+  <ClassForgeArt slot="hero-art" />
+
+  <Chapter chapter={ch[0]} />
+  <Chapter chapter={ch[1]}>
+    <figure class="raised chapter-figure" slot="figure">
+      <ClassForgeLayersArt />
+      <figcaption class="t-mono-s figure-caption">
+        The dependency direction, drawn from docs/ARCHITECTURE.md
+      </figcaption>
+    </figure>
+  </Chapter>
+  <Chapter chapter={ch[2]} />
+  <OmittedAside label={classforge.omitted!.label} note={classforge.omitted!.note} />
+  <Chapter chapter={ch[3]} />
+  <Chapter chapter={ch[4]} />
+</CaseLayout>

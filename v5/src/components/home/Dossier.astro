@@ -1,0 +1,223 @@
+---
+/* THE DOSSIER — the thirty-second read.
+
+   Adopted from a fork Michael liked: a recruiter-facts strip directly under the
+   hero — where he is based, what he studies, where he has worked, what he
+   ships with, and the CV — plus an index of the five case studies. Every value
+   is already locked Phase-0 content; this is a table of it, not new copy.
+
+   Set in v5's own vocabulary: a hairline ledger over the live world, mono
+   labels, and the five index entries each carrying their project's accent as a
+   tick that lights on hover. */
+const facts = [
+  { dt: "Based", dd: "Budapest, Hungary" },
+  { dt: "Study", dd: "ELTE Computer Science · July 2027" },
+  { dt: "Experience", dd: "Caresynq · Full-Stack Intern · Jun–Aug 2025" },
+  { dt: "Core", dd: "TypeScript · React · Node.js · PostgreSQL" },
+];
+
+const index = [
+  { pos: "01", title: "Support SaaS", href: "/work/support", acc: "var(--acc-support)" },
+  { pos: "02", title: "Vision", href: "/work/vision", acc: "var(--acc-vision)" },
+  { pos: "03", title: "Simiutopia", href: "/work/simiutopia", acc: "var(--acc-simiutopia)" },
+  { pos: "04", title: "Subways", href: "/work/subways", acc: "var(--acc-subways)" },
+  { pos: "05", title: "ClassForge", href: "/work/classforge", acc: "var(--acc-classforge)" },
+];
+---
+
+<section class="dossier" aria-labelledby="dossier-heading">
+  <div class="container">
+    <h2 id="dossier-heading" class="visually-hidden">Overview</h2>
+
+    <dl class="ledger" data-reveal>
+      {
+        facts.map((f) => (
+          <div class="cell">
+            <dt class="t-mono-s">{f.dt}</dt>
+            <dd>{f.dd}</dd>
+          </div>
+        ))
+      }
+      <div class="cell cell-cv">
+        <dt class="t-mono-s">Profile</dt>
+        <dd><a href="/cv.pdf" class="cv-link">Open CV <span aria-hidden="true">↗</span></a></dd>
+      </div>
+    </dl>
+
+    <nav class="index" aria-label="Case study index" data-reveal>
+      <span class="t-mono-s index-label">Case studies</span>
+      <ol class="index-row">
+        {
+          index.map((p) => (
+            <li>
+              <a href={p.href} class="index-link" style={`--i-acc: ${p.acc}`}>
+                <span class="index-tick" aria-hidden="true" />
+                <span class="t-mono-s index-pos">{p.pos}</span>
+                <span class="index-title">{p.title}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+  </div>
+</section>
+
+<style>
+  .dossier {
+    position: relative;
+    padding-block: var(--space-6) var(--space-4);
+  }
+  /* the same rule the project text obeys: facts are never read through a
+     moving particle field */
+  .dossier .container {
+    position: relative;
+  }
+  .dossier .container::before {
+    content: "";
+    position: absolute;
+    inset: -10% -4%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(70% 80% at 50% 40%, var(--void) 55%, transparent 92%);
+    opacity: 0.92;
+  }
+
+  /* ---- the ledger: five cells on one hairline shelf ---- */
+  .ledger {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    margin: 0;
+    border-block: var(--hairline) solid var(--line-2);
+  }
+  .cell {
+    min-width: 0;
+    padding: var(--space-4) var(--space-4) var(--space-4) 0;
+  }
+  .cell + .cell {
+    border-left: var(--hairline) solid var(--line-2);
+    padding-left: var(--space-4);
+  }
+  .cell dt {
+    text-transform: uppercase;
+    letter-spacing: var(--track-eyebrow);
+    color: var(--ink-3);
+  }
+  .cell dd {
+    margin: var(--space-2) 0 0;
+    color: var(--ink-2);
+    font-size: var(--text-body-s);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+  .cv-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--acc);
+    text-underline-offset: 0.28em;
+    transition: color var(--dur-fast) var(--ease-smooth);
+  }
+  .cv-link:hover,
+  .cv-link:focus-visible {
+    color: var(--acc-deep);
+  }
+
+  /* ---- the index: five doors in one row, each wearing its own light ---- */
+  .index {
+    display: grid;
+    grid-template-columns: 9rem minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-5);
+    border-bottom: var(--hairline) solid var(--line-2);
+  }
+  .index-label {
+    text-transform: uppercase;
+    letter-spacing: var(--track-eyebrow);
+    color: var(--ink-3);
+  }
+  .index-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .index-row li + li {
+    border-left: var(--hairline) solid var(--line-2);
+  }
+  .index-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--tap-min);
+    padding-inline: var(--space-3);
+    text-decoration: none;
+    color: var(--ink-2);
+    transition: color var(--dur-fast) var(--ease-smooth);
+  }
+  .index-tick {
+    width: 14px;
+    height: var(--rule-strong);
+    flex: none;
+    background: color-mix(in srgb, var(--i-acc) 55%, transparent);
+    transform-origin: left center;
+    transition:
+      transform var(--dur-medium) var(--ease-out-expo),
+      background-color var(--dur-fast) var(--ease-smooth);
+  }
+  .index-pos {
+    color: var(--ink-3);
+    transition: color var(--dur-fast) var(--ease-smooth);
+  }
+  .index-title {
+    font-size: var(--text-body-s);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .index-link:hover,
+  .index-link:focus-visible {
+    color: var(--ink);
+  }
+  .index-link:hover .index-tick,
+  .index-link:focus-visible .index-tick {
+    transform: scaleX(1.7);
+    background: var(--i-acc);
+  }
+  .index-link:hover .index-pos,
+  .index-link:focus-visible .index-pos {
+    color: var(--i-acc);
+  }
+
+  @media (max-width: 1023px) {
+    .ledger {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .cell:nth-child(odd) {
+      border-left: 0;
+      padding-left: 0;
+    }
+    .cell:nth-child(even) {
+      padding-left: var(--space-4);
+    }
+    .cell:nth-child(n + 3) {
+      border-top: var(--hairline) solid var(--line-2);
+    }
+    /* the index folds to a column of doors */
+    .index {
+      grid-template-columns: 1fr;
+      gap: var(--space-2);
+      padding-block: var(--space-3);
+    }
+    .index-row {
+      grid-template-columns: 1fr;
+    }
+    .index-row li + li {
+      border-left: 0;
+      border-top: var(--hairline) solid var(--line-2);
+    }
+    .index-link {
+      padding-inline: 0;
+    }
+  }
+</style>

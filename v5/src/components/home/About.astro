@@ -1,0 +1,93 @@
+---
+// Owner-supplied About copy; retain the existing composition and styling.
+import Pursuits from "./Pursuits.astro";
+---
+
+<section id="about" class="section about" aria-labelledby="about-heading">
+  <div class="container about-grid">
+    <div class="about-side">
+      <h2 id="about-heading" class="label" data-reveal="label">
+        <span>About</span><span class="label-rule"></span>
+      </h2>
+      <p class="t-mono-s about-langs" data-reveal>
+        Arabic native · English C1 · German A2 · Hungarian A1
+      </p>
+    </div>
+
+    <div class="about-main">
+      <p class="t-display-2 about-lead" data-reveal="lines">
+        I like building the parts of software that have to keep their promises.
+      </p>
+      <div class="prose about-body">
+        <p data-reveal>
+          I'm Michael, an Egyptian Computer Science student at ELTE in Budapest, graduating in
+          July 2027. I started with C and Bash, explored Java and Python at university, and found
+          my footing in full-stack development: building interfaces, designing APIs, and figuring
+          out what happens between them.
+        </p>
+        <p data-reveal>
+          What interests me most is the engineering behind a feature that actually works.
+          Authentication that stays secure when permissions change. Save files that restore
+          exactly what they should. A game that knows when a move is legal. I enjoy tracing
+          problems across an entire system, understanding why something breaks, and building
+          a solution I can test and trust.
+        </p>
+        <p data-reveal>
+          My projects reflect that approach. I write about the decisions I made, the problems
+          I encountered, what I tested, and what I'd do differently. There's always something
+          worth learning from the parts that didn't go according to plan.
+        </p>
+        <p data-reveal>
+          Outside of code, I play football, run, cycle, and swim. I also take coffee seriously
+          enough to argue about it. Budapest is a pretty good city for all five.
+        </p>
+      </div>
+
+      {/* a visual index of the sentence above — the same five, nothing added */}
+      <div data-reveal>
+        <Pursuits />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-grid {
+    max-width: 68rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+  @media (min-width: 900px) {
+    .about-grid {
+      grid-template-columns: 13rem minmax(0, 1fr);
+      gap: var(--space-6);
+    }
+  }
+  .about-side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+  .about-langs {
+    color: var(--ink-3);
+    text-transform: uppercase;
+    line-height: 1.9;
+  }
+  .about-lead {
+    max-width: 18ch;
+    margin-bottom: var(--space-7);
+  }
+  .about-body {
+    max-width: var(--measure-wide);
+    column-gap: var(--space-7);
+  }
+  @media (min-width: 1200px) {
+    .about-body {
+      columns: 2;
+    }
+    .about-body p {
+      break-inside: avoid;
+    }
+  }
+</style>

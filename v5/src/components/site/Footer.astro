@@ -1,0 +1,66 @@
+---
+// contact-footer-404.md — footer, all pages. Copy carried from the locked set.
+const year = 2026;
+---
+
+<footer class="foot">
+  <div class="container">
+    <div class="foot-row">
+      <span class="foot-mark">Michael Tawfik</span>
+      <nav class="foot-links" aria-label="Elsewhere">
+        <span class="t-mono-s foot-place">Budapest</span>
+        <a href="mailto:michaeltawfik2004@gmail.com" class="link-mono">michaeltawfik2004@gmail.com</a>
+        <a href="https://github.com/Michaelll402" class="link-mono" rel="me">GitHub ↗</a>
+        <a href="https://www.linkedin.com/in/michaeltawfik4" class="link-mono" rel="me">LinkedIn ↗</a>
+        <a href="/cv.pdf" class="link-mono">CV ↗</a>
+      </nav>
+    </div>
+    {/* No colophon. A build log and a version stamp are notes to other
+        developers; the audience here is the person deciding whether to
+        interview Michael, and they are owed a year and nothing else. */}
+    <p class="t-mono-s colophon">© {year} Michael Tawfik</p>
+  </div>
+</footer>
+
+<style>
+  .foot {
+    position: relative;
+    padding-block: var(--space-8) var(--space-7);
+    border-top: var(--hairline) solid var(--line-2);
+  }
+  .foot-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-5);
+  }
+  .foot-mark {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    letter-spacing: -0.012em;
+  }
+  .foot-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    align-items: baseline;
+  }
+  .foot-place {
+    color: var(--ink-3);
+    text-transform: uppercase;
+  }
+  .colophon {
+    margin-top: var(--space-6);
+    color: var(--ink-3);
+  }
+  .ver {
+    color: color-mix(in srgb, var(--acc) 70%, var(--ink-3));
+  }
+  @media (max-width: 767px) {
+    .foot-links {
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+  }
+</style>

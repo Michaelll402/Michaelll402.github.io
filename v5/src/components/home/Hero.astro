@@ -1,0 +1,232 @@
+---
+// hero.md — copy verbatim from the locked set. Composition is new; words are not.
+---
+
+<section class="hero" id="hero" data-world="0" aria-labelledby="hero-name">
+  <div class="container hero-grid">
+    <div class="hero-type">
+      <p class="t-eyebrow hero-eyebrow"><span>Full-Stack Software Engineer</span></p>
+
+      {/* The visible words ARE the heading. There used to be a visually-hidden
+          copy of the name here as well, with the visible words marked
+          aria-hidden — so the h1's text content read "Michael Tawfik Michael
+          Tawfik" to anything parsing the DOM, which is every search engine. */}
+      <h1 id="hero-name" class="t-display-0 hero-name">
+        <span class="hero-line"><span class="hero-word">Michael</span></span>
+        <span class="hero-line hero-line-2"><span class="hero-word">Tawfik</span></span>
+      </h1>
+
+      <div class="hero-lower">
+        <p class="hero-capability">
+          I like the whole problem: the interface, the API, the database, and the bugs that live
+          between them.
+        </p>
+
+        <div class="hero-aside">
+          <p class="t-mono-s hero-meta">Budapest · ELTE Computer Science · graduating July 2027</p>
+          <div class="hero-actions">
+            <a href="#work" class="btn btn-primary" data-magnetic><span>See the work</span></a>
+            <a href="#contact" class="btn" data-magnetic><span>Contact</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-foot container">
+    <span class="t-mono-s hero-cue" aria-hidden="true">
+      <span class="cue-rule"></span>Scroll
+    </span>
+    <span class="t-mono-s hero-read" aria-hidden="true">Five projects · one structure</span>
+  </div>
+</section>
+
+<style>
+  /* Identity and actions are already readable in the first rendered frame. */
+  /* Asymmetric by construction: the type owns the left and the lower half of
+     the frame, the sculpture owns the upper right. Nothing is centred, and the
+     headline is never sitting on top of a glowing orb. */
+  .hero {
+    position: relative;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-block: calc(var(--header-h) + var(--space-8)) var(--space-7);
+  }
+  /* the wordmark is allowed the whole frame — it is the largest thing on the
+     site and it should be. Only the supporting block is set in a column. */
+  .hero-grid {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .hero-lower {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+  }
+  @media (min-width: 1024px) {
+    .hero-lower {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
+      gap: var(--space-8);
+      align-items: end;
+    }
+    /* the supporting text sits under the start of the wordmark, the actions
+       under its end: the eye travels the same line the type does */
+    .hero-aside {
+      grid-column: 2;
+      justify-self: start;
+    }
+  }
+
+  .hero-eyebrow {
+    overflow: hidden;
+    margin-bottom: var(--space-5);
+  }
+  .hero-eyebrow > span {
+    display: inline-block;
+  }
+  .hero-name {
+    width: 100%;
+    text-transform: uppercase;
+    font-variation-settings: "opsz" var(--opsz-display), "wght" 520;
+    margin-bottom: var(--space-6);
+  }
+  /* each line is its own mask so the words rise out of nothing */
+  .hero-line {
+    display: block;
+    overflow: hidden;
+    padding-block: 0.02em;
+  }
+  .hero-word {
+    display: inline-block;
+  }
+  .hero-line-2 {
+    /* the second line steps in: an optical indent, not a centred block */
+    padding-left: 0.09em;
+    color: var(--ink-2);
+  }
+
+  .hero-capability {
+    font-family: var(--font-display);
+    font-size: clamp(1.05rem, 1.6vw, 1.5rem);
+    line-height: 1.4;
+    color: var(--ink-2);
+    max-width: 32ch;
+    margin: 0;
+  }
+  .hero-meta {
+    color: var(--ink-3);
+    text-transform: uppercase;
+    margin-bottom: var(--space-5);
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .hero-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    color: var(--ink-3);
+  }
+  .hero-cue {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-transform: uppercase;
+  }
+  .cue-rule {
+    display: block;
+    width: 46px;
+    height: var(--hairline);
+    background: linear-gradient(90deg, transparent, var(--ink-3));
+    transform-origin: left center;
+    animation: cue 2.8s var(--ease-in-out) infinite;
+  }
+  @keyframes cue {
+    0%, 100% { transform: scaleX(0.35); opacity: 0.5; }
+    50% { transform: scaleX(1); opacity: 1; }
+  }
+  .hero-read {
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 1099px) {
+    .hero {
+      /* clears the floating name pod plus the notch */
+      padding-block: calc(var(--header-h-mobile) + env(safe-area-inset-top, 0px) + var(--space-6))
+        var(--space-6);
+      min-height: 92svh;
+    }
+    .hero-lower {
+      gap: var(--space-5);
+    }
+    .hero-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-3);
+    }
+    .hero-actions .btn {
+      width: 100%;
+    }
+  }
+  /* a landscape phone is short, not narrow: the call to action has to be on
+     screen without scrolling */
+  @media (max-height: 520px) and (orientation: landscape) {
+    .hero {
+      min-height: 0;
+      padding-block: calc(var(--header-h-mobile) + var(--space-4)) var(--space-5);
+    }
+    /* the wordmark is sized against the WIDTH everywhere else, which in
+       landscape makes it taller than the screen — 615px of hero in a 390px
+       viewport, with the buttons below the fold. Height wins here. */
+    .hero-name {
+      font-size: min(12vw, 15.5vh);
+      margin-bottom: var(--space-4);
+    }
+    .hero-eyebrow {
+      margin-bottom: var(--space-3);
+    }
+    .hero-capability {
+      font-size: 0.95rem;
+      max-width: 34ch;
+    }
+    .hero-meta {
+      margin-bottom: var(--space-3);
+    }
+    .hero-lower {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: end;
+      gap: var(--space-5);
+    }
+    .hero-aside {
+      grid-column: 2;
+    }
+    .hero-actions {
+      display: flex;
+    }
+    /* the portrait rules stretch each button to the full row; left in place here
+       the two of them wrapped onto two lines and cost 60px of a 390px screen */
+    .hero-actions .btn {
+      width: auto;
+    }
+    .hero-foot {
+      display: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .hero-read { display: none; }
+    .hero-capability { max-width: 34ch; }
+  }
+  @media (prefers-reduced-motion: reduce), (pointer: coarse), (max-width: 1023px) {
+    .cue-rule { animation: none; transform: scaleX(1); }
+  }
+</style>

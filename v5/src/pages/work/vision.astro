@@ -1,0 +1,23 @@
+---
+import CaseLayout from "../../components/work/CaseLayout.astro";
+import Chapter from "../../components/work/Chapter.astro";
+import OmittedAside from "../../components/work/OmittedAside.astro";
+import VisionArt from "../../components/art/VisionArt.astro";
+import VisionDemo from "../../components/islands/VisionDemo";
+import { vision } from "../../content/work/vision";
+
+const ch = vision.chapters;
+---
+
+<CaseLayout cs={vision}>
+  <VisionArt slot="hero-art" />
+
+  <Chapter chapter={ch[0]} />
+  <Chapter chapter={ch[1]} />
+  <Chapter chapter={ch[2]}>
+    <VisionDemo slot="demo" client:visible={{ rootMargin: "300px" }} />
+  </Chapter>
+  <OmittedAside label={vision.omitted!.label} note={vision.omitted!.note} />
+  <Chapter chapter={ch[3]} />
+  <Chapter chapter={ch[4]} />
+</CaseLayout>

@@ -1,0 +1,45 @@
+---
+import CaseLayout from "../../components/work/CaseLayout.astro";
+import Chapter from "../../components/work/Chapter.astro";
+import SupportArt from "../../components/art/SupportArt.astro";
+import SupportFlowArt from "../../components/art/SupportFlowArt.astro";
+import SupportDemo from "../../components/islands/SupportDemo";
+import { support } from "../../content/work/support";
+
+const ch = support.chapters;
+---
+
+<CaseLayout cs={support}>
+  <SupportArt slot="hero-art" />
+
+  <Chapter chapter={ch[0]} />
+  <Chapter chapter={ch[1]} />
+  <Chapter chapter={ch[2]}>
+    <figure class="raised chapter-figure" slot="figure">
+      <SupportFlowArt />
+      <figcaption class="t-mono-s figure-caption">
+        Reconstruction: request → queue → socket flow, drawn from the codebase
+      </figcaption>
+    </figure>
+  </Chapter>
+  <Chapter chapter={ch[3]} />
+  <Chapter chapter={ch[4]}>
+    <SupportDemo slot="demo" client:visible={{ rootMargin: "300px" }} />
+  </Chapter>
+  <Chapter chapter={ch[5]} />
+  <Chapter chapter={ch[6]} />
+</CaseLayout>
+
+<style>
+  .chapter-figure {
+    margin: var(--space-5) 0 0;
+    overflow: hidden;
+  }
+  .figure-caption {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    border-top: var(--hairline) solid var(--line);
+    color: var(--ink-2);
+    text-transform: uppercase;
+  }
+</style>

@@ -1,0 +1,120 @@
+---
+// replay-chapter.md — one chapter: label, display title, story, optional figure,
+// step-into (<details>, no JS), optional demo slot (via named slot).
+import type { ChapterContent } from "../../content/work/types";
+
+interface Props {
+  chapter: ChapterContent;
+}
+const { chapter } = Astro.props;
+const hasFigure = Astro.slots.has("figure");
+const hasDemo = Astro.slots.has("demo");
+---
+
+<section class="chapter" id={`ch-${chapter.num}`} aria-labelledby={`ch-${chapter.num}-title`} data-chapter={chapter.num} data-chapter-name={chapter.name}>
+  <p class="t-mono chapter-label" data-reveal>{chapter.num} {chapter.name}</p>
+  <h2 class="t-h2 chapter-title" id={`ch-${chapter.num}-title`} tabindex="-1" data-reveal="lines">
+    {chapter.title}
+  </h2>
+  <div class="prose chapter-story" data-reveal>
+    {chapter.story.map((p) => <p>{p}</p>)}
+  </div>
+
+  {
+    hasFigure && (
+      <div class="chapter-figure-slot" data-reveal data-tilt>
+        <slot name="figure" />
+      </div>
+    )
+  }
+
+  <details class="step-into">
+    <summary class="t-mono">
+      <span class="si-open">step into ▸</span>
+      <span class="si-close">step out ▴</span>
+    </summary>
+    <div class="prose step-into-body">
+      {chapter.stepInto.map((p) => <p>{p}</p>)}
+    </div>
+  </details>
+
+  {
+    hasDemo && (
+      <div class="chapter-demo-slot" data-reveal>
+        <slot name="demo" />
+      </div>
+    )
+  }
+</section>
+
+<style>
+  .chapter {
+    margin-top: var(--space-chapter);
+    scroll-margin-top: calc(var(--header-h) + var(--space-6));
+  }
+  .chapter-label {
+    color: var(--acc-deep);
+    text-transform: uppercase;
+    letter-spacing: var(--track-eyebrow);
+    margin: 0;
+  }
+  .chapter-title {
+    margin-top: var(--space-2);
+    max-width: 24ch;
+  }
+  .chapter-title:focus {
+    outline: none;
+  }
+  .chapter-story {
+    margin-top: var(--space-5);
+  }
+  /* the figure is a physical object here too: it tilts under the pointer and
+     carries the same specular the project surfaces on the index do */
+  .chapter-figure-slot {
+    margin-top: var(--space-6);
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  .chapter-demo-slot {
+    margin-top: var(--space-6);
+  }
+  .step-into {
+    margin-top: var(--space-5);
+  }
+  .step-into summary {
+    list-style: none;
+    cursor: pointer;
+    color: var(--acc-deep);
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap-min);
+    transition: text-decoration-color var(--dur-fast) var(--ease-out);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.3em;
+  }
+  .step-into summary::-webkit-details-marker {
+    display: none;
+  }
+  .step-into summary:hover,
+  .step-into summary:focus-visible {
+    text-decoration-color: currentColor;
+  }
+  .si-close {
+    display: none;
+  }
+  .step-into[open] .si-open {
+    display: none;
+  }
+  .step-into[open] .si-close {
+    display: inline;
+  }
+  .step-into-body {
+    background: var(--paper-2);
+    border: var(--hairline) solid var(--line);
+    border-left: var(--rule-strong) solid var(--acc);
+    border-radius: var(--radius-s);
+    padding: var(--space-5);
+    margin-top: var(--space-3);
+  }
+</style>

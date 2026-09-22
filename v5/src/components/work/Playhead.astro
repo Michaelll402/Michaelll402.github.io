@@ -1,0 +1,165 @@
+---
+// playhead.md — desktop fixed rail (≥1200px) + mobile sticky bar (<1200px).
+// Phase 2 static state: rail neutral (truthful table of contents, no current marker);
+// bar shows 01 / TOTAL · <first chapter> with progress 0.
+import type { ChapterContent } from "../../content/work/types";
+
+interface Props {
+  chapters: ChapterContent[];
+}
+const { chapters } = Astro.props;
+const total = String(chapters.length).padStart(2, "0");
+---
+
+<nav class="playhead-rail" aria-label="Replay chapters" data-playhead-rail>
+  <span class="rail-dot" data-rail-dot aria-hidden="true"></span>
+  <ul>
+    {
+      chapters.map((c: ChapterContent) => (
+        <li>
+          <a href={`#ch-${c.num}`} class="tick t-mono-s" data-tick={c.num}>
+            <span class="tick-marker" aria-hidden="true" />
+            {c.num}
+            <span class="visually-hidden"> {c.name}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<div class="playhead-bar" data-playhead-bar>
+  <p class="t-mono-s bar-text">
+    <span data-bar-current>01</span> / {total} · <span data-bar-name>{chapters[0].name}</span>
+  </p>
+  <span class="bar-progress" data-bar-progress aria-hidden="true"></span>
+</div>
+
+<style>
+  /* desktop rail */
+  .playhead-rail {
+    display: none;
+  }
+  @media (min-width: 1200px) {
+    .playhead-rail {
+      display: block;
+      position: fixed;
+      left: max(var(--space-5), calc((100vw - var(--container)) / 2));
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: var(--z-playhead);
+    }
+    .playhead-rail ul {
+      position: relative;
+      list-style: none;
+      margin: 0;
+      padding: 0 0 0 var(--space-4);
+      border-left: var(--hairline) solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+    }
+    /* the light that travels down the rail as the replay is read */
+    .playhead-rail ul::before {
+      content: "";
+      position: absolute;
+      left: -1px;
+      top: 0;
+      width: var(--rule-strong);
+      height: 100%;
+      background: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--acc) 30%, transparent),
+        var(--acc)
+      );
+      transform: scaleY(var(--rail-progress, 0));
+      transform-origin: top center;
+      box-shadow: 0 0 14px color-mix(in srgb, var(--acc) 55%, transparent);
+      pointer-events: none;
+    }
+    /* and the marker that glides between chapters rather than blinking */
+    .rail-dot {
+      position: absolute;
+      left: -4.5px;
+      top: 0;
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--acc);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--acc) 18%, transparent),
+        0 0 16px color-mix(in srgb, var(--acc) 70%, transparent);
+      margin-top: -4.5px;
+      pointer-events: none;
+      will-change: transform;
+    }
+    /* 17px of glyph; the target is grown past it to clear the 24px minimum
+       without changing the rail's typographic scale */
+    .tick::after {
+      content: "";
+      position: absolute;
+      inset: -10px -8px;
+    }
+    .tick {
+      position: relative;
+      color: var(--ink-2);
+      text-decoration: none;
+      transition: color var(--dur-fast) var(--ease-out);
+      display: inline-flex;
+      align-items: center;
+    }
+    .tick:hover,
+    .tick:focus-visible {
+      color: var(--ink);
+      text-decoration: underline;
+      text-underline-offset: 0.25em;
+    }
+    /* superseded by the gliding marker above */
+    .tick-marker {
+      display: none;
+    }
+    .tick[aria-current="true"] {
+      color: var(--acc-deep);
+    }
+    .tick[aria-current="true"] .tick-marker {
+      opacity: 1;
+    }
+  }
+
+  /* mobile bar (sits under the sticky glass header) */
+  .playhead-bar {
+    position: sticky;
+    top: var(--header-h);
+    z-index: var(--z-playhead);
+    background: var(--paper);
+    border-bottom: var(--hairline) solid var(--line);
+    height: 40px;
+    display: flex;
+    align-items: center;
+  }
+  .bar-text {
+    margin: 0;
+    padding-inline: var(--gutter);
+    color: var(--ink-2);
+    text-transform: uppercase;
+  }
+  .bar-progress {
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    height: var(--rule-strong);
+    width: 100%;
+    background: var(--acc);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  @media (max-width: 1023px) {
+    .playhead-bar {
+      top: var(--header-h-mobile);
+    }
+  }
+  @media (min-width: 1200px) {
+    .playhead-bar {
+      display: none;
+    }
+  }
+</style>

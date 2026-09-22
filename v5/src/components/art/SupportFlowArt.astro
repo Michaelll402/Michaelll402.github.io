@@ -1,0 +1,72 @@
+---
+// Reconstruction: request → queue → socket flow (support, chapter 03).
+// Facts: BullMQ idempotent jobs; Socket.IO rooms; API never blocks on background work.
+// Geometry note: box widths are sized to the longest label at 14px mono
+// (~8.4px/char) so no text can ever spill its box.
+---
+
+<svg
+  viewBox="0 0 840 330"
+  role="img"
+  aria-label="Reconstruction of the notification flow: the REST API enqueues a job with a deterministic ID; BullMQ delivers it; Socket.IO rooms broadcast to the ticket's participants."
+  class="art"
+>
+  <!-- stage 1 -->
+  <g transform="translate(24,54)">
+    <rect width="216" height="72" rx="6" class="box" />
+    <text x="18" y="30" class="mono ink">REST API</text>
+    <text x="18" y="54" class="mono ink2">enqueues, returns</text>
+  </g>
+  <path d="M248 90h44" class="wire" />
+  <path d="M287 84l8 6-8 6" class="wire" />
+  <text x="252" y="72" class="mono acc-deep small">JOB ID</text>
+
+  <!-- stage 2 -->
+  <g transform="translate(300,54)">
+    <rect width="228" height="72" rx="6" class="box" />
+    <text x="18" y="30" class="mono ink">BULLMQ ON REDIS</text>
+    <text x="18" y="54" class="mono ink2">retry = same job ID</text>
+  </g>
+  <path d="M536 90h44" class="wire" />
+  <path d="M575 84l8 6-8 6" class="wire" />
+
+  <!-- stage 3 -->
+  <g transform="translate(588,54)">
+    <rect width="228" height="72" rx="6" class="box" />
+    <text x="18" y="30" class="mono ink">SOCKET.IO GATEWAY</text>
+    <text x="18" y="54" class="mono ink2">same JWT cookie</text>
+  </g>
+
+  <!-- broadcast into rooms -->
+  <path d="M702 126v34" class="wire" />
+  <path d="M702 160 466 196 M702 160v36 M702 160 466 250" class="wire thin" fill="none" />
+
+  <g transform="translate(396,172)">
+    <rect width="150" height="48" rx="6" class="room" />
+    <text x="16" y="30" class="mono ink2">ROOM: USER</text>
+  </g>
+  <g transform="translate(596,172)">
+    <rect width="164" height="48" rx="6" class="room" />
+    <text x="16" y="30" class="mono ink2">ROOM: TICKET</text>
+  </g>
+  <g transform="translate(396,232)">
+    <rect width="150" height="48" rx="6" class="room" />
+    <text x="16" y="30" class="mono ink2">ROOM: STAFF</text>
+  </g>
+
+  <text x="24" y="196" class="mono ink2">A FAILED JOB RETRIES.</text>
+  <text x="24" y="222" class="mono ink2">THE API NEVER WAITS.</text>
+</svg>
+
+<style>
+  .art { display: block; width: 100%; height: auto; background: var(--paper-2); }
+  .mono { font-family: var(--font-mono); font-size: 14px; letter-spacing: 0.03em; }
+  .mono.small { font-size: 12px; }
+  .ink { fill: var(--ink); }
+  .ink2 { fill: var(--ink-2); }
+  .acc-deep { fill: var(--acc-support-deep); }
+  .box { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5; }
+  .room { fill: var(--paper); stroke: var(--acc-support); stroke-width: 1.5; stroke-dasharray: 5 4; }
+  .wire { stroke: var(--acc-support); stroke-width: 2; fill: none; }
+  .wire.thin { stroke-width: 1.25; opacity: 0.7; }
+</style>

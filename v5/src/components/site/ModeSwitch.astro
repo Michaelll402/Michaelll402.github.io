@@ -1,0 +1,134 @@
+---
+// Night is the authored grade; day is a real second grade. The switch changes
+// one attribute on <html>; the tokens re-skin the document and the shader
+// re-grades the world from the same signal, so the two can never disagree.
+---
+
+<button
+  type="button"
+  class="mode"
+  data-mode-switch
+  aria-pressed="false"
+  aria-label="Switch to day"
+  title="Day / night"
+>
+  <span class="mode-track" aria-hidden="true">
+    <span class="mode-thumb"></span>
+    <svg class="mode-ico mode-sun" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="4.2" />
+      <g stroke-linecap="round">
+        <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6" />
+      </g>
+    </svg>
+    <svg class="mode-ico mode-moon" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.4 8.4 0 1 0 10.2 10.2Z" />
+    </svg>
+  </span>
+</button>
+
+<script>
+  import { motion } from "../../webgl/store";
+
+  function initMode() {
+    const btn = document.querySelector<HTMLButtonElement>("[data-mode-switch]");
+    if (!btn || btn.dataset.wired) return;
+    btn.dataset.wired = "1";
+
+    const sync = () => {
+      const day = document.documentElement.dataset.mode === "day";
+      btn.setAttribute("aria-pressed", String(day));
+      btn.setAttribute("aria-label", day ? "Switch to night" : "Switch to day");
+      motion.mode = day ? "day" : "night";
+    };
+    sync();
+
+    btn.addEventListener("click", () => {
+      const day = document.documentElement.dataset.mode === "day";
+      document.documentElement.dataset.mode = day ? "night" : "day";
+      try {
+        localStorage.setItem("site-mode", day ? "night" : "day");
+      } catch (e) {}
+      sync();
+    });
+  }
+
+  initMode();
+  document.addEventListener("astro:page-load", initMode);
+</script>
+
+<style>
+  /* inside a pod the switch has no rim of its own — the pod is the glass */
+  .mode {
+    display: inline-grid;
+    place-items: center;
+    width: 50px;
+    height: 30px;
+    /* the control is 30px tall by design; the TARGET is 44. The shorthand below
+       used to come after this and silently reset it, so the target stayed 30px. */
+    box-sizing: content-box;
+    /* the thumb's travel is derived from this, so the two can never disagree */
+    --track-w: 50px;
+    --thumb: 22px;
+    --inset: 3px;
+    padding: 7px 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .mode-track {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .mode-thumb {
+    position: absolute;
+    top: var(--inset);
+    left: var(--inset);
+    width: var(--thumb);
+    height: var(--thumb);
+    border-radius: 999px;
+    background: var(--ink);
+    /* Travel is derived from the track, not hardcoded. It was a flat 20px while
+       the track is 50px wide on a laptop and 54px on a phone — so at night, when
+       the thumb sits on the right, it stopped short and sat visibly off-centre
+       against the moon. A percentage cannot be used here: percentages in a
+       transform resolve against the ELEMENT, not its parent. */
+    transform: translateX(calc(var(--track-w) - var(--thumb) - var(--inset) * 2));
+    transition: transform 520ms var(--ease-out-expo);
+  }
+  .mode[aria-pressed="true"] .mode-thumb {
+    transform: translateX(0);
+  }
+  .mode-ico {
+    position: absolute;
+    top: 7px;
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    transition: opacity var(--dur-medium) var(--ease-smooth), color var(--dur-medium) var(--ease-smooth);
+  }
+  .mode-sun {
+    left: 6px;
+    color: var(--ink-3);
+  }
+  .mode-moon {
+    right: 6px;
+    color: var(--void);
+  }
+  .mode[aria-pressed="true"] .mode-sun { color: var(--void); }
+  .mode[aria-pressed="true"] .mode-moon { color: var(--ink-3); }
+  @media (max-width: 1099px) {
+    .mode {
+      --track-w: 54px;
+      width: 54px;
+      padding: 12px 4px;
+    }
+  }
+  /* the icons follow the same rule so they stay centred in their halves */
+  .mode-sun { left: 6px; }
+  .mode-moon { right: 6px; }
+</style>

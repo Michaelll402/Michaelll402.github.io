@@ -1,0 +1,146 @@
+---
+// §15 v4.2 LIVING RECONSTRUCTION — the support workspace at work.
+// A message pulse travels customer → thread; the agent answers; the internal
+// note stays behind the staff-only wall; socket waves broadcast the update.
+// Honest to docs/facts/support.md: four roles, server-side privacy, rooms, queue.
+interface Props {
+  title?: string;
+}
+const { title = "Living reconstruction of the support workspace: a customer message travels into the ticket thread, an agent replies, internal notes stay staff-only, and socket rooms broadcast the update." } = Astro.props;
+---
+
+<svg viewBox="0 0 800 450" role="img" aria-label={title} class="art" data-mobile-art="support">
+  <!-- wires -->
+  <line x1="190" y1="225" x2="290" y2="225" class="wire" />
+  <line x1="510" y1="225" x2="610" y2="225" class="wire" />
+  <line x1="400" y1="96" x2="400" y2="140" class="wire thin" />
+  <line x1="400" y1="310" x2="400" y2="354" class="wire thin" />
+
+  <!-- privacy wall on the customer wire -->
+  <g transform="translate(232,225)">
+    <line x1="0" y1="-18" x2="0" y2="18" class="wall" />
+    <line x1="10" y1="-18" x2="10" y2="18" class="wall" />
+  </g>
+  <text x="60" y="262" class="mono ink2">SERVER-SIDE FILTER</text>
+
+  <!-- traveling pulses -->
+  <circle r="5" class="pulse pulse-in" data-anim />
+  <circle r="5" class="pulse pulse-out" data-anim />
+
+  <!-- ticket thread -->
+  <g class="thread">
+    <rect x="290" y="140" width="220" height="170" rx="6" class="card" />
+    <text x="310" y="170" class="mono ink">TICKET #</text>
+    <line x1="310" y1="182" x2="490" y2="182" class="hair" />
+    <rect x="310" y="196" width="130" height="10" rx="4" class="msg customer-msg" data-anim />
+    <rect x="310" y="216" width="160" height="10" rx="4" class="msg agent-msg" data-anim />
+    <g class="note" data-anim>
+      <rect x="310" y="240" width="180" height="48" rx="4" class="note-box" />
+      <text x="322" y="260" class="mono acc-deep">INTERNAL NOTE</text>
+      <text x="322" y="278" class="mono ink2">STAFF ONLY</text>
+    </g>
+  </g>
+
+  <!-- roles -->
+  <g class="role">
+    <rect x="60" y="203" width="130" height="44" rx="6" class="rolebox" />
+    <text x="78" y="230" class="mono ink">CUSTOMER</text>
+  </g>
+  <g class="role">
+    <rect x="610" y="203" width="130" height="44" rx="6" class="rolebox" />
+    <text x="646" y="230" class="mono ink">AGENT</text>
+  </g>
+  <g class="role">
+    <rect x="335" y="52" width="130" height="44" rx="6" class="rolebox" />
+    <text x="374" y="79" class="mono ink">ADMIN</text>
+  </g>
+  <g class="role">
+    <rect x="335" y="354" width="130" height="44" rx="6" class="rolebox" />
+    <text x="364" y="381" class="mono ink">MANAGER</text>
+  </g>
+
+  <!-- realtime broadcast -->
+  <g class="socket">
+    <text x="560" y="330" class="mono acc-deep">SOCKET.IO ROOMS</text>
+    <g class="waves" transform="translate(675,270)">
+      <path d="M0 0 a14 14 0 0 1 14 14" class="wave w1" data-anim />
+      <path d="M0 -8 a22 22 0 0 1 22 22" class="wave w2" data-anim />
+      <path d="M0 -16 a30 30 0 0 1 30 30" class="wave w3" data-anim />
+    </g>
+    <text x="560" y="354" class="mono ink2">BULLMQ · IDEMPOTENT JOBS</text>
+  </g>
+</svg>
+
+<style>
+  .art { display: block; width: 100%; height: auto; background: var(--paper-2); }
+  .mono { font-family: var(--font-mono); font-size: 15px; letter-spacing: 0.04em; }
+  .ink { fill: var(--ink); }
+  .ink2 { fill: var(--ink-2); }
+  .acc-deep { fill: var(--acc-support-deep); }
+  .hair { stroke: var(--line); stroke-width: 1; }
+  .wire { stroke: var(--acc-support); stroke-width: 2; }
+  .wire.thin { stroke-width: 1.5; stroke-dasharray: 5 5; }
+  .wall { stroke: var(--ink); stroke-width: 2.5; }
+  .card { fill: var(--paper); stroke: var(--ink); stroke-width: 1.5; }
+  .rolebox { fill: var(--paper-2); stroke: var(--acc-support); stroke-width: 1.5; }
+  .note-box { fill: var(--paper-2); stroke: var(--acc-support-deep); stroke-width: 1.5; stroke-dasharray: 4 4; }
+
+  /* an 8s workspace day: message in → reply → note guarded → broadcast */
+  .pulse { fill: var(--acc-support); opacity: 0; }
+  .pulse-in { animation: pulse-in 8s var(--ease-ui) infinite; }
+  @keyframes pulse-in {
+    0% { transform: translate(190px, 225px); opacity: 0; }
+    4% { opacity: 1; }
+    16% { transform: translate(290px, 225px); opacity: 1; }
+    19%, 100% { opacity: 0; }
+  }
+  .pulse-out { animation: pulse-out 8s var(--ease-ui) infinite; }
+  @keyframes pulse-out {
+    0%, 40% { transform: translate(610px, 225px); opacity: 0; }
+    44% { opacity: 1; }
+    56% { transform: translate(510px, 225px); opacity: 1; }
+    59%, 100% { opacity: 0; }
+  }
+  .msg { transform-origin: left center; }
+  .customer-msg {
+    fill: var(--line);
+    animation: msg-write 8s var(--ease-out) infinite;
+  }
+  .agent-msg {
+    fill: var(--acc-support);
+    opacity: 0.6;
+    animation: msg-write-agent 8s var(--ease-out) infinite;
+  }
+  @keyframes msg-write {
+    0%, 16% { transform: scaleX(0); }
+    26%, 100% { transform: scaleX(1); }
+  }
+  @keyframes msg-write-agent {
+    0%, 56% { transform: scaleX(0); }
+    68%, 100% { transform: scaleX(1); }
+  }
+  .note { animation: note-guard 8s var(--ease-ui) infinite; transform-origin: 400px 264px; }
+  @keyframes note-guard {
+    0%, 60% { opacity: 0.55; }
+    68%, 82% { opacity: 1; }
+    92%, 100% { opacity: 0.55; }
+  }
+  .wave { fill: none; stroke: var(--acc-support); stroke-width: 2; opacity: 0.15; }
+  .w1 { animation: wave-ping 8s var(--ease-ui) infinite; animation-delay: 5.8s; }
+  .w2 { animation: wave-ping 8s var(--ease-ui) infinite; animation-delay: 6s; }
+  .w3 { animation: wave-ping 8s var(--ease-ui) infinite; animation-delay: 6.2s; }
+  @keyframes wave-ping {
+    0%, 2% { opacity: 0.15; }
+    6% { opacity: 1; }
+    16%, 100% { opacity: 0.15; }
+  }
+
+  @media (prefers-reduced-motion: reduce), (max-width: 1023px), (pointer: coarse), (hover: none) {
+    .pulse, .customer-msg, .agent-msg, .note, .wave {
+      animation: none;
+    }
+    .customer-msg, .agent-msg { transform: scaleX(1); }
+    .note { opacity: 1; }
+    .wave { opacity: 0.6; }
+  }
+</style>

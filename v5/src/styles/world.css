@@ -1,0 +1,558 @@
+/* ============================================================================
+   v4 — THE WORLD LAYER
+   Materials, typography, motion primitives, and the fallbacks that keep the
+   portfolio a portfolio when none of it can run.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------- the canvas */
+.world {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-world);
+  pointer-events: none;
+  /* the field is painted in CSS first, so the page is never a black rectangle
+     while the GPU context is still being created */
+  background:
+    radial-gradient(120% 90% at 22% 8%, color-mix(in srgb, var(--acc-support) 13%, transparent), transparent 62%),
+    radial-gradient(100% 80% at 84% 72%, color-mix(in srgb, var(--acc-vision) 10%, transparent), transparent 60%),
+    var(--void);
+  transition: opacity 900ms var(--ease-smooth);
+}
+.world canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+/* The canvas fades in over the CSS stand-in instead of replacing it in one
+   frame. The two fields are painted to match, so what the eye sees is the
+   atmosphere gaining depth, not a background being swapped. */
+/* The mount host must FILL the world. react-three-fiber sizes its canvas to the
+   parent, and this div was left at auto height by the manual-mount refactor — so
+   the canvas rendered 712px tall inside a 900px viewport on a laptop, and 187px
+   inside 844px on a phone. The world was being drawn into a strip. */
+[data-world-root] {
+  position: absolute;
+  inset: 0;
+}
+
+.world canvas {
+  opacity: 0;
+  /* 450ms, not 900. A fade that long left the world visibly dimmer than it used
+     to be for the first second of a visit — long enough that a hard refresh
+     looked like the background had gone missing. It still arrives without a
+     pop; it just stops dawdling. */
+  transition: opacity 160ms ease-out;
+}
+html.world-presented .world canvas {
+  opacity: 1;
+}
+
+/* Actual-render first paint: inline preview, progressively sharpened by one
+   theme/viewport-selected image. Mobile never replaces it with a canvas. */
+.world-fallback { position: absolute; inset: 0; opacity: 1; visibility: visible; transition: opacity 160ms ease-out; }
+.world-preview, .world-detail { position: absolute; inset: 0; background-position: center; background-size: cover; background-repeat: no-repeat; }
+.world-preview { background-image: var(--poster-preview); }
+.world-detail { background-image: var(--poster-full); }
+html.world-presented .world-fallback { opacity: 0; visibility: hidden; transition: opacity 160ms ease-out, visibility 0s 160ms; }
+html.no-webgl .world-fallback { opacity: 1; visibility: visible; }
+html.no-webgl .world canvas { opacity: 0; }
+html.world-quiet:not(.world-presented) .world-fallback { opacity: .18; }
+@media (prefers-reduced-motion: reduce), (pointer: coarse), (max-width: 1023px) {
+  .world canvas { visibility: hidden; }
+  html.world-presented .world-fallback { opacity: 1; visibility: visible; transition: none; }
+}
+
+/* WebGL missing or lost: keep the atmosphere, lose only the sculpture */
+html.no-webgl .world {
+  background:
+    radial-gradient(120% 90% at 22% 8%, color-mix(in srgb, var(--acc-support) 16%, transparent), transparent 62%),
+    radial-gradient(100% 80% at 84% 72%, color-mix(in srgb, var(--acc-vision) 12%, transparent), transparent 60%),
+    radial-gradient(80% 60% at 55% 40%, color-mix(in srgb, var(--acc-simiutopia) 9%, transparent), transparent 55%),
+    var(--void);
+}
+
+.filters {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Content remains above the persistent background. */
+.doc {
+  position: relative;
+  z-index: var(--z-base);
+}
+
+/* ------------------------------------------------------------------- layout */
+.container {
+  width: min(100% - var(--gutter) * 2, var(--container));
+  margin-inline: auto;
+}
+.section {
+  padding-block: var(--space-section);
+  position: relative;
+}
+
+/* --------------------------------------------------------------- typography */
+.t-display-0,
+.t-display-1,
+.t-display-2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: var(--leading-display);
+  letter-spacing: var(--track-display);
+  font-variation-settings: "opsz" var(--opsz-display);
+  margin: 0;
+}
+.t-display-0 { font-size: var(--text-display-0); }
+.t-display-1 { font-size: var(--text-display-1); }
+.t-display-2 { font-size: var(--text-display-2); }
+
+.t-h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-h2);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.018em;
+  font-variation-settings: "opsz" var(--opsz-heading);
+  font-weight: 500;
+  margin: 0;
+}
+.t-h3 {
+  font-family: var(--font-body);
+  font-size: var(--text-h3);
+  line-height: 1.25;
+  font-weight: 560;
+  letter-spacing: -0.008em;
+  margin: 0;
+}
+.t-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0;
+}
+.t-mono,
+.t-mono-s {
+  font-family: var(--font-mono);
+  letter-spacing: var(--track-mono);
+  line-height: var(--leading-mono);
+}
+.t-mono { font-size: var(--text-mono); }
+.t-mono-s { font-size: var(--text-mono-s); }
+
+.prose p {
+  font-size: var(--text-body-l);
+  line-height: var(--leading-body);
+  color: var(--ink-2);
+  max-width: var(--measure);
+  margin: 0 0 1.1em;
+}
+.prose p:last-child { margin-bottom: 0; }
+
+/* a section label: mono word plus a rule that draws itself */
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-eyebrow);
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 var(--space-6);
+}
+.label-rule {
+  flex: 1;
+  height: var(--hairline);
+  background: linear-gradient(90deg, var(--line), transparent);
+}
+
+/* ------------------------------------------------------------ split masking */
+.r-line,
+.r-char {
+  will-change: transform;
+}
+
+/* ----------------------------------------------------------- the glass system
+   Not `rgba + blur`. A real material: a translucent fill, a lit rim that
+   catches light on the top and left, a shadowed rim opposite, a specular that
+   tracks the pointer, and a grain so large panels never band. */
+/* Deliberately NO backdrop-filter on the large panels.
+   Measured: blurring the backdrop of four full-size panels that sit over a live
+   WebGL canvas cost 41-71ms the first time each one scrolled into view — the
+   only remaining stutter on the page. Over a soft particle field the blur
+   contributes almost nothing anyway; the thickness comes from the layered fill,
+   the two-sided rim and the specular, which are free. The nav rail keeps its
+   real blur, because there the refraction IS the design and it is one small
+   element that can be warmed during load. */
+.glass {
+  position: relative;
+  isolation: isolate;
+  /* Two layers, in this order: a light sheen across the top face, over a body
+     that is genuinely dense. A single gradient that fades to transparent at one
+     end leaves half the panel see-through, which reads as a rectangle with a
+     tint rather than as a slab of glass. */
+  background:
+    linear-gradient(170deg, var(--glass-bg-2), transparent 52%),
+    var(--glass-bg);
+  border: var(--hairline) solid var(--glass-rim);
+  border-radius: var(--radius);
+  box-shadow:
+    inset 0 1px 0 var(--glass-rim-lit),
+    inset 1px 0 0 color-mix(in srgb, var(--glass-rim-lit) 45%, transparent),
+    var(--glass-shadow);
+}
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--hi, 0);
+  transition: opacity var(--dur-medium) var(--ease-smooth);
+  background: radial-gradient(
+    18rem 12rem at var(--mx, 50%) var(--my, 50%),
+    var(--glass-sheen),
+    transparent 68%
+  );
+}
+/* No grain layer here. An feTurbulence tile per panel is an extra composited
+   layer and one of the most expensive things a browser can rasterise — it cost
+   a visible 45ms hitch the first time each panel scrolled into view. The world
+   behind the glass already carries film grain, which is where grain belongs. */
+
+/* ------------------------------------------------------------------ controls */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-5);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  border: var(--hairline) solid var(--line);
+  color: var(--ink);
+  background: transparent;
+  transition:
+    border-color var(--dur-fast) var(--ease-smooth),
+    color var(--dur-fast) var(--ease-smooth),
+    background-color var(--dur-fast) var(--ease-smooth);
+}
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: var(--hi, 0);
+  transition: opacity var(--dur-medium) var(--ease-smooth);
+  background: radial-gradient(
+    8rem 4rem at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--ink) 16%, transparent),
+    transparent 70%
+  );
+}
+.btn:hover,
+.btn:focus-visible {
+  border-color: color-mix(in srgb, var(--ink) 42%, transparent);
+}
+.btn-primary {
+  background: var(--ink);
+  color: var(--void);
+  border-color: transparent;
+}
+.btn-primary::before {
+  background: radial-gradient(
+    8rem 4rem at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--acc) 55%, transparent),
+    transparent 70%
+  );
+}
+/* the label counter-moves a little against a magnetic button */
+[data-magnetic] > span {
+  display: inline-block;
+  transition: transform var(--dur-medium) var(--ease-smooth);
+}
+[data-magnetic]:hover > span {
+  transform: translate3d(calc((var(--mx, 50%) - 50%) * -0.06), 0, 0);
+}
+
+.link {
+  color: var(--ink);
+  text-decoration: none;
+  position: relative;
+  padding-bottom: 2px;
+}
+/* the underline grows from the side the pointer arrives on */
+.link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--hairline);
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: var(--from, left) center;
+  transition: transform var(--dur-medium) var(--ease-out-expo);
+}
+.link:hover::after,
+.link:focus-visible::after {
+  transform: scaleX(1);
+}
+/* WCAG 2.2 asks 24x24 CSS px minimum. This measured 21px tall on desktop (the
+   mobile rule below already grows it to 44). The hit area is extended past the
+   glyphs rather than the type being resized to satisfy a number. */
+.link-mono {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--track-mono);
+  color: var(--ink-2);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-smooth);
+}
+.link-mono::after {
+  content: "";
+  position: absolute;
+  inset: -12px -6px;
+}
+.link-mono:hover,
+.link-mono:focus-visible { color: var(--ink); }
+
+/* ------------------------------------------------------------------- cursor */
+.cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--ink);
+  z-index: var(--z-cursor);
+  pointer-events: none;
+  mix-blend-mode: difference;
+  opacity: 0;
+  transition: opacity var(--dur-medium) var(--ease-smooth);
+}
+html.has-cursor .cursor { opacity: 1; }
+html.has-cursor * { cursor: none; }
+html.has-cursor a,
+html.has-cursor button { cursor: none; }
+.cursor[data-state="read"] {
+  background: transparent;
+  border: var(--hairline) solid var(--ink);
+}
+.cursor-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-mono);
+  font-size: 3.4px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease-smooth);
+}
+.cursor[data-state="read"] .cursor-label { opacity: 1; }
+
+/* ----------------------------------------------------------------- utilities */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+.skip {
+  position: absolute;
+  left: var(--space-4);
+  top: -4rem;
+  z-index: var(--z-skip);
+  padding: var(--space-3) var(--space-4);
+  background: var(--ink);
+  color: var(--void);
+  border-radius: var(--radius-s);
+  transition: top var(--dur-fast) var(--ease-smooth);
+}
+.skip:focus { top: var(--space-4); }
+
+:where(a, button, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--acc-deep);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ------------------------------------------------------------- no JS, no fuss
+   Without script the mode attribute is never stamped, so the case studies would
+   fall back to the light grade they inherited from v3. Stamp it in markup too. */
+/* Without JavaScript nothing reveals itself, so nothing may start hidden. */
+html.no-js [data-reveal] {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Native Astro swaps on phones: no full-viewport snapshot choreography. */
+:root, .world, .sweep { view-transition-name: none; }
+
+@media (min-width: 1024px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  :root { view-transition-name: root; }
+  .world { view-transition-name: world; }
+  ::view-transition-group(*) { animation-duration: 180ms; animation-timing-function: ease-out; }
+  ::view-transition-old(world) { display: none; }
+  ::view-transition-new(world) { animation: none; }
+  ::view-transition-old(root) { animation: none; }
+  ::view-transition-new(root) { animation: page-in 140ms ease-out both; }
+  ::view-transition-group(enter-art) { animation-duration: 200ms; }
+  ::view-transition-old(enter-art) { animation: vt-fade 100ms ease-out reverse both; }
+  ::view-transition-new(enter-art) { animation: vt-fade 140ms ease-out both; }
+}
+@keyframes page-in { from { opacity: .55; } to { opacity: 1; } }
+@keyframes vt-fade { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 1023px), (pointer: coarse), (prefers-reduced-motion: reduce) {
+  :root, .world, [data-astro-transition-scope] { view-transition-name: none !important; }
+  ::view-transition { display: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none; }
+}
+
+/* ============================================================================
+   PHONES
+   ----------------------------------------------------------------------------
+   Most of the people this site is for will open it on a phone, so this is not a
+   fallback layout — it is the primary one. Everything here is a measured fix for
+   something that was actually wrong: the nav sat on top of the content, tap
+   targets were 21-35px against Apple's 44pt minimum, the page ran to thirteen
+   screens, and there was no press feedback on a device that has no hover.
+   ========================================================================== */
+@media (max-width: 1099px) {
+  /* the top bar and the dock both float over the page, so the page has to make
+     room for them — including the safe areas on a notched device */
+  .doc {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 92px);
+  }
+  .section {
+    padding-block: clamp(3.5rem, 9vh, 5.5rem);
+  }
+  .container {
+    /* the gutter respects a landscape notch */
+    padding-inline: max(0px, env(safe-area-inset-left)) max(0px, env(safe-area-inset-right));
+  }
+
+  /* 44px minimum on everything you can tap. These were 21-35px. */
+  .link-mono,
+  .prose a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .btn {
+    min-height: 48px;
+    padding-inline: var(--space-4);
+    /* the larger mono step pushed "SEE THE WORK" onto two lines on a 375px
+       screen; a button label that wraps reads as two buttons */
+    white-space: nowrap;
+  }
+
+  /* touch has no hover: feedback happens on press instead */
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active,
+  .link-mono:active {
+    transform: scale(0.97);
+  }
+
+  /* one long measure per line is unreadable on a phone; these caps are set in
+     characters so they follow the type size rather than the device */
+  .prose p {
+    max-width: 34ch;
+  }
+
+  /* Secondary text was rendering at 11.5px — eyebrows, taglines, form labels,
+     the meta line, the footer. That is fine on a desktop monitor at 60cm and
+     genuinely hard held in one hand. Both mono steps go up on phones. */
+  :root {
+    --text-mono: 0.875rem;
+    --text-mono-s: 0.8rem;
+  }
+
+  /* display leading that works at 15rem does not work at 2.5rem: a heading has
+     to breathe more, not less, when it is small */
+  .t-display-2 {
+    line-height: 1.02;
+  }
+
+  /* inline mono links were 36px wide — under the target minimum in one axis */
+  .link-mono {
+    min-width: 44px;
+    justify-content: center;
+  }
+}
+
+/* landscape phones are short, not narrow: give the height back to the content */
+@media (max-height: 520px) and (orientation: landscape) {
+  .section {
+    padding-block: 2.5rem;
+  }
+  .doc {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 76px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .world { opacity: 0.85; }
+}
+
+
+/* ============================================================================
+   ANCHOR LANDING
+   ----------------------------------------------------------------------------
+   Every jump target has to clear the fixed navigation. Measured: scroll-margin
+   was 0 on all four homepage sections at desktop width, and #work never had it
+   at any width, so a nav jump parked the section's own heading directly beneath
+   the pods — the reader arrived at a section whose title was hidden.
+   ========================================================================== */
+#hero,
+#work,
+#craft,
+#about,
+#contact,
+#main {
+  scroll-margin-top: calc(var(--header-h) + var(--space-4));
+}
+@media (max-width: 1023px) {
+  #hero,
+  #work,
+  #craft,
+  #about,
+  #contact,
+  #main {
+    scroll-margin-top: calc(var(--header-h-mobile) + env(safe-area-inset-top, 0px) + var(--space-3));
+  }
+}

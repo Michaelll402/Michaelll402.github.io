@@ -1,0 +1,363 @@
+/* Signature-demo styling (motion.md D-*). Shared by the four React islands.
+   All values from tokens. Islands SSR their static state; hydration adds behavior. */
+
+.demo-panel {
+  background: var(--paper-2);
+  border: var(--hairline) solid var(--line);
+  border-radius: var(--radius-s);
+  margin: var(--space-6) 0 0;
+  overflow: hidden;
+}
+
+/* no-JS: islands SSR their static state; hide controls that need hydration,
+   show the static-view note instead (honest chrome, audit pass 3) */
+html.no-js .demo-js-only {
+  display: none;
+}
+html.js .demo-nojs-note {
+  display: none;
+}
+.demo-nojs-note {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+.demo-head {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--hairline) solid var(--line);
+}
+.demo-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  color: var(--acc-deep);
+  text-transform: uppercase;
+}
+.demo-note {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+.demo-body {
+  padding: var(--space-5);
+}
+.demo-footnote {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  color: var(--ink-2);
+  margin: var(--space-4) 0 0;
+  text-transform: uppercase;
+}
+.demo-reset {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  background: transparent;
+  border: var(--hairline) solid var(--line);
+  color: var(--ink-2);
+  padding: var(--space-2) var(--space-3);
+  min-height: var(--tap-min);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.demo-reset:hover,
+.demo-reset:focus-visible {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+/* chip groups (roles, cards, stations) */
+.demo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.demo-chip {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  border: var(--hairline) solid var(--line);
+  background: transparent;
+  color: var(--ink-2);
+  padding: var(--space-2) var(--space-3);
+  min-height: var(--tap-min);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+.demo-chip:hover,
+.demo-chip:focus-visible {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.demo-chip[aria-pressed="true"],
+.demo-chip[aria-checked="true"],
+.demo-chip[data-active="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.demo-chip:disabled {
+  cursor: default;
+}
+
+.demo-status {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  margin: var(--space-4) 0 0;
+  min-height: 1.5em;
+}
+.demo-status .ok {
+  color: var(--acc-deep);
+}
+.demo-status .no {
+  color: var(--ink-2);
+}
+
+/* support permission table */
+.perm-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--space-5);
+}
+.perm-table th {
+  text-align: left;
+  font-weight: 400;
+  font-size: var(--text-body-s);
+  padding: var(--space-3) 0;
+  border-bottom: var(--hairline) solid var(--line);
+  color: var(--ink);
+}
+.perm-table td {
+  text-align: right;
+  padding: var(--space-3) 0;
+  border-bottom: var(--hairline) solid var(--line);
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--track-mono);
+}
+.perm-allow {
+  color: var(--acc-deep);
+}
+.perm-deny {
+  color: var(--ink-2);
+}
+.perm-row-swap {
+  transition: opacity var(--dur-ui) var(--ease-ui);
+}
+.demo-admin-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: var(--hairline) solid var(--line);
+}
+.demo-admin-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  color: var(--ink-2);
+  text-transform: uppercase;
+  margin-right: var(--space-2);
+}
+
+/* vision stepper */
+.stepper-card {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) 1fr;
+  gap: var(--space-5);
+  margin-top: var(--space-5);
+  align-items: start;
+}
+.stepper-visual {
+  border: var(--hairline) solid var(--line);
+  background: var(--paper);
+}
+.stepper-visual svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.stepper-facts {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.stepper-facts dt {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  color: var(--acc-deep);
+  text-transform: uppercase;
+}
+.stepper-facts dd {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-body-s);
+}
+.stepper-nav {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+.stepper-rows {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  color: var(--ink);
+  background: var(--paper);
+  border: var(--hairline) solid var(--line);
+  padding: var(--space-3);
+  margin: 0;
+  overflow-x: auto;
+}
+@media (max-width: 640px) {
+  .stepper-card {
+    grid-template-columns: 1fr;
+  }
+  .stepper-visual {
+    max-width: 220px;
+  }
+}
+
+/* simiutopia scrub */
+.scrub-figure {
+  border: var(--hairline) solid var(--line);
+  background: var(--paper);
+}
+.scrub-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.scrub-controls {
+  margin-top: var(--space-5);
+}
+.scrub-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  color: var(--ink-2);
+  text-transform: uppercase;
+}
+.scrub-controls input[type="range"] {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-3);
+  accent-color: var(--acc-deep);
+  min-height: var(--tap-min);
+}
+.scrub-readout {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono);
+  letter-spacing: var(--track-mono);
+  color: var(--acc-deep);
+  text-transform: uppercase;
+  margin: var(--space-2) 0 0;
+}
+.scrub-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  color: var(--ink-2);
+  text-transform: uppercase;
+  min-height: var(--tap-min);
+  cursor: pointer;
+}
+.scrub-toggle input {
+  accent-color: var(--acc-deep);
+  width: 16px;
+  height: 16px;
+}
+
+/* subways board */
+.board-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+.board-figure {
+  border: var(--hairline) solid var(--line);
+  background: var(--paper);
+}
+.board-figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.board-segment {
+  cursor: pointer;
+  /* transparent stroke must still catch clicks (default visiblePainted would not) */
+  pointer-events: stroke;
+}
+.board-segment:focus-visible {
+  outline: 2px solid var(--acc-deep);
+  outline-offset: 2px;
+}
+.rules-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  color: var(--ink-2);
+  text-transform: uppercase;
+  margin: 0;
+}
+.checks-label {
+  margin-top: var(--space-5);
+}
+.check-list {
+  list-style: none;
+  margin: var(--space-2) 0 0;
+  padding: 0;
+}
+.check-item {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-s);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  color: var(--ink-2);
+  padding: var(--space-2) 0;
+  border-bottom: var(--hairline) solid var(--line);
+  transition: color var(--dur-ui) var(--ease-ui);
+}
+.check-item[data-state="pass"] {
+  color: var(--acc-deep);
+}
+.check-item[data-state="fail"] {
+  color: var(--ink);
+}
+.check-reason {
+  display: block;
+  text-transform: none;
+  color: var(--ink-2);
+  margin-top: var(--space-1);
+}
+@media (max-width: 640px) {
+  .board-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,205 @@
+---
+// contact-footer-404.md — Contact. Copy verbatim from the locked set.
+// Formspree fail-closed: the native POST works with no JavaScript at all, and
+// with JavaScript any non-2xx or network failure shows the error and the
+// mailto fallback. No silent failures.
+import { FORMSPREE_ENDPOINT } from "../../config/site";
+---
+
+<section id="contact" class="section contact" aria-labelledby="contact-heading">
+  <div class="container">
+    <h2 id="contact-heading" class="label" data-reveal="label">
+      <span>Contact</span><span class="label-rule"></span>
+    </h2>
+
+    <p class="t-display-1 contact-head" data-reveal="chars">Have something worth building?</p>
+
+    <div class="contact-grid">
+      <div class="contact-side">
+        <p class="contact-body" data-reveal>
+          I'm looking for software engineering internships and student developer roles, in
+          Budapest or remote. Tell me what you're working on.
+        </p>
+        <a href="mailto:michaeltawfik2004@gmail.com" class="contact-email" data-reveal>
+          michaeltawfik2004@gmail.com
+        </a>
+        <p class="contact-ext" data-reveal>
+          <a href="https://github.com/Michaelll402" class="link-mono" rel="me">GitHub ↗</a>
+          <a href="https://www.linkedin.com/in/michaeltawfik4" class="link-mono" rel="me">LinkedIn ↗</a>
+          <a href="/cv.pdf" class="link-mono">CV ↗</a>
+        </p>
+      </div>
+
+      <form class="contact-form glass" method="POST" action={FORMSPREE_ENDPOINT} data-contact-form data-reveal>
+        <div class="field">
+          <label for="cf-name">Your name</label>
+          <input id="cf-name" name="name" type="text" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label for="cf-email">Email</label>
+          <input id="cf-email" name="email" type="email" autocomplete="email" required />
+        </div>
+        <div class="field">
+          <label for="cf-message">Message</label>
+          <textarea id="cf-message" name="message" rows="5" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary contact-send" data-magnetic>
+          <span>Send message</span>
+        </button>
+        <p class="form-status t-mono-s" role="status" aria-live="polite" data-form-status></p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<script>
+  function wireContactForm() {
+    const form = document.querySelector<HTMLFormElement>("[data-contact-form]");
+    const status = document.querySelector<HTMLElement>("[data-form-status]");
+    if (!form || !status || form.dataset.wired) return;
+    form.dataset.wired = "1";
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      status.textContent = "";
+      status.classList.remove("is-error", "is-ok");
+      try {
+        const res = await fetch(form.action, {
+          method: "POST",
+          body: new FormData(form),
+          headers: { Accept: "application/json" },
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        status.textContent =
+          "Sent. I read everything that lands here, and I'll reply to your address.";
+        status.classList.add("is-ok");
+      } catch {
+        status.innerHTML =
+          'That did not send. Email me directly at <a href="mailto:michaeltawfik2004@gmail.com">michaeltawfik2004@gmail.com</a>.';
+        status.classList.add("is-error");
+      }
+    });
+  }
+  wireContactForm();
+  document.addEventListener("astro:page-load", wireContactForm);
+</script>
+
+<style>
+  .contact-head {
+    max-width: 14ch;
+    margin-bottom: var(--space-8);
+  }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-7);
+  }
+  @media (min-width: 1024px) {
+    .contact-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: var(--space-8);
+      align-items: start;
+    }
+  }
+  .contact-body {
+    font-size: var(--text-body-l);
+    line-height: var(--leading-body);
+    color: var(--ink-2);
+    max-width: 34ch;
+    margin-bottom: var(--space-6);
+  }
+  .contact-email {
+    display: inline-block;
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 2.6vw, 2.1rem);
+    letter-spacing: -0.015em;
+    color: var(--ink);
+    text-decoration: none;
+    background-image: linear-gradient(var(--acc), var(--acc));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% var(--hairline);
+    transition: background-size 700ms var(--ease-out-expo), color var(--dur-medium) var(--ease-smooth);
+  }
+  .contact-email:hover,
+  .contact-email:focus-visible {
+    background-size: 0% var(--hairline);
+    color: var(--acc-deep);
+  }
+  .contact-ext {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+    margin-top: var(--space-6);
+  }
+  .contact-form {
+    padding: var(--space-6);
+    display: grid;
+    gap: var(--space-5);
+  }
+  .field {
+    display: grid;
+    gap: var(--space-2);
+  }
+  .field label {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono-s);
+    letter-spacing: var(--track-mono);
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .field input,
+  .field textarea {
+    font: inherit;
+    color: var(--ink);
+    background: transparent;
+    border: 0;
+    border-bottom: var(--hairline) solid var(--line);
+    padding: var(--space-3) 0;
+    border-radius: 0;
+    transition: border-color var(--dur-medium) var(--ease-smooth);
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 7rem;
+  }
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--acc);
+  }
+  .contact-send {
+    justify-self: start;
+  }
+  .form-status {
+    margin: 0;
+    min-height: 1.4em;
+    color: var(--ink-2);
+  }
+  .form-status.is-ok { color: var(--acc-deep); }
+  .form-status.is-error { color: var(--acc-vision); }
+  .form-status :global(a) { color: inherit; }
+
+  @media (max-width: 1099px) {
+    .contact-email {
+      display: inline-flex;
+      align-items: center;
+      min-height: 52px;
+      /* it has to survive a 375px screen without overflowing */
+      font-size: clamp(1.05rem, 5.2vw, 1.6rem);
+      word-break: break-word;
+    }
+    .contact-form {
+      padding: var(--space-5);
+    }
+    .field input,
+    .field textarea {
+      /* anything under 16px makes iOS Safari zoom the whole page on focus */
+      font-size: 16px;
+      padding-block: var(--space-3);
+    }
+    .contact-send {
+      width: 100%;
+    }
+  }
+</style>

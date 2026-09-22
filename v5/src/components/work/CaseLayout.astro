@@ -1,0 +1,585 @@
+---
+// case-hero.md + replay-chapter.md — full case-study page shell.
+// Renders hero, playhead, product/problem, chapters (with omitted aside),
+// learned/improve, next-project footer. Copy from src/content/work/<slug>.ts (verbatim Phase 0).
+// the replay demos are the only thing that needs these, so they load with the
+// replays instead of blocking the homepage's first paint
+import "../../styles/demos.css";
+import Base from "../../layouts/Base.astro";
+import Playhead from "./Playhead.astro";
+import ImmersionHero from "./ImmersionHero.astro";
+import type { CaseStudy } from "../../content/work/types";
+
+interface Props {
+  cs: CaseStudy;
+}
+const { cs } = Astro.props;
+
+/* Which formation the world holds while you read this case study. The sculpture
+   stays in that project's own diagram for the whole page, so entering a replay
+   feels like walking into the shape you were just looking at. */
+const NEXT_SLUG = cs.next.href.split("/").filter(Boolean).pop() ?? "";
+const POSITION: Record<string, string> = {
+  support: "01",
+  vision: "02",
+  simiutopia: "03",
+  subways: "04",
+  classforge: "05",
+};
+
+const WORLD_CHAPTER: Record<string, number> = {
+  support: 1,
+  vision: 2,
+  simiutopia: 3,
+  subways: 4,
+  classforge: 5,
+};
+---
+
+<Base
+  title={cs.metaTitle}
+  description={cs.metaDescription}
+  accent={cs.slug}
+  ogImage={cs.slug}
+  ogAlt={`${cs.title} — a project by Michael Tawfik`}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    name: cs.title,
+    description: cs.metaDescription,
+    codeRepository: cs.repoHref,
+    author: { "@type": "Person", name: "Michael Tawfik" },
+    url: new URL(Astro.url.pathname, Astro.site).toString(),
+  }}
+>
+  <div class="case-accent-rule" aria-hidden="true"></div>
+
+  <!-- §15 v4.6: the whole replay lives inside the project's world -->
+  <div class="case-stage" data-immersion data-world={String(WORLD_CHAPTER[cs.slug])}>
+    <div class="stage-particles" aria-hidden="true">
+      <div class="stage-particles-inner" data-imm-particles></div>
+    </div>
+
+    <Playhead chapters={cs.chapters} />
+
+    <ImmersionHero cs={cs}>
+      <slot name="hero-art" slot="art" />
+    </ImmersionHero>
+
+    <article class="container case" data-quiet>
+      <div class="case-body">
+      <section aria-labelledby="product-label">
+        <p class="t-mono block-label" id="product-label">The Product</p>
+        <p class="product-text">{cs.product}</p>
+      </section>
+
+      <section aria-labelledby="problem-label">
+        <p class="t-mono block-label" id="problem-label">The Problem</p>
+        <div class="prose"><p>{cs.problem}</p></div>
+      </section>
+
+      <div class="chapters">
+        <slot />
+      </div>
+
+      <section class="closing" aria-labelledby="learned-label">
+        <p class="t-mono block-label" id="learned-label">What I learned</p>
+        <div class="prose"><p>{cs.learned}</p></div>
+      </section>
+
+        <section class="closing" aria-labelledby="improve-label">
+          <p class="t-mono block-label" id="improve-label">What I'd improve next</p>
+          <div class="prose"><p>{cs.improve}</p></div>
+        </section>
+      </div>
+    </article>
+
+  </div>
+
+  <!-- You surface out of one memory and it hands you the next. The title carries
+       the same view-transition name as the destination's own heading, so the two
+       are the SAME element to the browser: it morphs across the navigation
+       instead of one page fading into another. -->
+  {/* No aria-label: the panel's own visible text ("Next project · 02 / 04 ·
+      <title>") already names the link, and an aria-label that does not contain
+      the visible words fails label-content-name-mismatch. */}
+  <a class="case-next" href={cs.next.href} data-accent={NEXT_SLUG} data-tilt>
+    <span class="next-glow" aria-hidden="true"></span>
+    <span class="container next-inner">
+      <span class="next-meta">
+        <span class="t-eyebrow">Next project</span>
+        <span class="t-mono next-pos">{POSITION[NEXT_SLUG] ?? ""} / 05</span>
+      </span>
+      {/* Deliberately NOT paired with the destination heading. The two are set
+          at different sizes and wrap to different line counts, so the browser
+          cross-fades them mid-travel and you see the title twice — a ghost, not
+          a morph. The continuity is carried by the world instead, which never
+          leaves the screen. */}
+      <span class="t-display-2 next-title">{cs.next.title}</span>
+      <span class="next-go" aria-hidden="true">
+        <span class="next-go-label t-mono">Open the replay</span>
+        <span class="next-arrow">
+          <svg viewBox="0 0 24 24" focusable="false"><path d="M4 12h15M13 6l6 6-6 6" /></svg>
+        </span>
+      </span>
+    </span>
+  </a>
+</Base>
+
+<style>
+  /* §15 v5.1 — the project's rule used to hit the floating capsule as a hard
+     full-width seam. It is now a filament of that project's light: brightest
+     under the capsule, dissolving toward both edges. */
+  .case-accent-rule {
+    height: var(--rule-strong);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--acc) 55%, transparent) 18%,
+      var(--acc) 50%,
+      color-mix(in srgb, var(--acc) 55%, transparent) 82%,
+      transparent
+    );
+  }
+  :global(html[data-mode="night"]) .case-accent-rule {
+    box-shadow: 0 0 22px color-mix(in srgb, var(--acc) 45%, transparent);
+  }
+  .case {
+    /* the nav floats over everything now, so the crumbs must start below it */
+    padding-top: calc(var(--header-h) + var(--space-6));
+  }
+  .case-crumbs {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 0 0 var(--space-7);
+  }
+  .crumbs-pos {
+    color: var(--ink-2);
+  }
+  .case-title {
+    max-width: 18ch;
+  }
+  .case-oneliner {
+    font-size: var(--text-body-l);
+    line-height: var(--leading-body);
+    max-width: var(--measure-wide);
+    margin: var(--space-4) 0 0;
+  }
+  .case-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.4fr;
+    gap: var(--space-6);
+    border-block: var(--hairline) solid var(--line);
+    padding-block: var(--space-5);
+    margin: var(--space-7) 0 0;
+  }
+  .case-meta dd {
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-body-s);
+  }
+  .stack-list {
+    text-transform: uppercase;
+    color: var(--acc-deep);
+  }
+  .case-repo {
+    margin: var(--space-5) 0 0;
+  }
+  .repo-link {
+    color: var(--acc-deep);
+  }
+  .repo-link:hover,
+  .repo-link:focus-visible {
+    color: var(--acc-deep);
+  }
+  .case-visual {
+    margin: var(--space-6) 0 0;
+    overflow: hidden;
+  }
+  .visual-caption {
+    display: block;
+    padding: var(--space-3) var(--space-4);
+    border-top: var(--hairline) solid var(--line);
+    color: var(--ink-2);
+    text-transform: uppercase;
+  }
+
+  .case-body {
+    margin-top: var(--space-9);
+  }
+  .block-label {
+    color: var(--acc-deep);
+    text-transform: uppercase;
+    letter-spacing: var(--track-eyebrow);
+    margin: 0;
+  }
+  .product-text {
+    font-size: var(--text-body-l);
+    line-height: var(--leading-body);
+    max-width: var(--measure-wide);
+    margin: var(--space-4) 0 0;
+  }
+  .case-body > section + section {
+    margin-top: var(--space-8);
+  }
+  .prose {
+    margin-top: var(--space-4);
+  }
+
+  .closing {
+    margin-top: var(--space-8);
+  }
+  .chapters + .closing {
+    margin-top: var(--space-chapter);
+  }
+
+  /* ---- the handover ---- */
+  .case-next {
+    position: relative;
+    display: block;
+    isolation: isolate;
+    padding-block: clamp(3.5rem, 12vh, 7rem);
+    text-decoration: none;
+    color: var(--ink);
+    border-top: var(--hairline) solid var(--line-2);
+    overflow: hidden;
+    will-change: transform;
+    transition: transform var(--dur-medium) var(--ease-out-expo);
+  }
+  /* the next project's light rises through the panel as you approach it */
+  .next-glow {
+    position: absolute;
+    inset: auto -10% -60%;
+    height: 150%;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(60% 60% at 50% 100%, var(--acc), transparent 70%);
+    opacity: 0.14;
+    transform: translateY(22%);
+    transition:
+      opacity 700ms var(--ease-smooth),
+      transform 900ms var(--ease-out-expo);
+  }
+  .case-next:hover .next-glow,
+  .case-next:focus-visible .next-glow {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  .next-inner {
+    display: block;
+  }
+  .next-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+  .next-pos {
+    color: var(--acc);
+  }
+  .next-title {
+    display: block;
+    max-width: 16ch;
+  }
+  .next-go {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+    color: var(--acc-deep);
+  }
+  .next-go-label {
+    text-transform: uppercase;
+  }
+  .next-arrow {
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 999px;
+    border: var(--hairline) solid color-mix(in srgb, var(--acc) 55%, transparent);
+    overflow: hidden;
+  }
+  .next-arrow svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 620ms var(--ease-out-expo);
+  }
+  /* the arrow leaves the frame on one side and re-enters on the other, so the
+     gesture reads as departure rather than as a nudge */
+  .case-next:hover .next-arrow svg,
+  .case-next:focus-visible .next-arrow svg {
+    animation: next-arrow 620ms var(--ease-out-expo);
+  }
+  @keyframes next-arrow {
+    0% { transform: translateX(0); }
+    45% { transform: translateX(140%); }
+    46% { transform: translateX(-140%); }
+    100% { transform: translateX(0); }
+  }
+  .case-next:active {
+    transform: scale(0.995);
+  }
+  @media (max-width: 1023px) {
+    .case-next {
+      padding-block: var(--space-8);
+    }
+    .next-title {
+      max-width: 100%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .case-next,
+    .next-glow,
+    .next-arrow svg {
+      transition: none;
+      animation: none;
+    }
+  }
+
+  /* the reading column clears the rail on wide screens */
+  @media (min-width: 1200px) {
+    .case-body,
+    .case-hero {
+      padding-left: 5rem;
+    }
+  }
+  @media (max-width: 1023px) {
+    /* authored mobile order: crumbs → title → one-liner → visual → meta → repo */
+    .case-hero {
+      display: flex;
+      flex-direction: column;
+    }
+    .case-crumbs { order: 1; }
+    .case-title { order: 2; }
+    .case-oneliner { order: 3; }
+    .case-visual { order: 4; }
+    .case-meta { order: 5; }
+    .case-repo { order: 6; }
+    .case-meta {
+      grid-template-columns: 1fr 1fr;
+    }
+    .meta-stack {
+      grid-column: 1 / -1;
+    }
+  }
+  /* ============================================================
+     §15 v4.6 — THE STAGE: the entire replay inside the project's world.
+     Token overrides re-skin every descendant (prose, panels, demos,
+     playhead, artworks) to the night-of-this-project in one place.
+     ============================================================ */
+  /* ---------- DAY WORLD (default): the project's light, on paper ---------- */
+  .case-stage {
+    --ink: #17161a;
+    --ink-2: #57545c;
+    --line: rgba(20, 20, 24, 0.12);
+    --paper: #f7f6f2;
+    --paper-2: rgba(255, 255, 255, 0.72);
+    --stage-glass: rgba(255, 255, 255, 0.66);
+    --stage-rim: rgba(255, 255, 255, 0.9);
+    --stage-edge: rgba(20, 20, 24, 0.1);
+    --stage-shadow: 0 26px 60px -42px rgba(20, 20, 24, 0.5);
+    --sp-panel: rgba(255, 255, 255, 0.96);
+    --sp-stroke: rgba(20, 20, 24, 0.5);
+    --sp-dim: rgba(20, 20, 24, 0.24);
+    --sp-dark: #17161a;
+    --mood-x: 64%;
+    --mood-y: 30%;
+    --mood-strength: 16%;
+    position: relative;
+    isolation: isolate;
+    color: var(--ink);
+    background-color: #f7f6f2;
+    background-attachment: fixed;
+    background-image:
+      radial-gradient(120% 80% at var(--mood-x) var(--mood-y),
+        color-mix(in srgb, var(--acc) var(--mood-strength), #fbfaf7) 0%,
+        color-mix(in srgb, var(--acc) 7%, #f7f6f2) 46%,
+        #f4f3ef 100%);
+    transition: background-image 1500ms cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: clip;
+  }
+
+  /* ---------- NIGHT WORLD: the project's light, in the dark ---------- */
+  :global(html[data-mode="night"]) .case-stage {
+    --ink: #f4f2ec;
+    --ink-2: rgba(244, 242, 236, 0.68);
+    --line: rgba(244, 242, 236, 0.16);
+    --paper: #08080a;
+    --paper-2: rgba(255, 255, 255, 0.055);
+    --stage-glass: rgba(255, 255, 255, 0.055);
+    --stage-rim: rgba(255, 255, 255, 0.14);
+    --stage-edge: rgba(255, 255, 255, 0.14);
+    --stage-shadow: 0 24px 60px -40px rgba(0, 0, 0, 0.9);
+    --sp-panel: rgba(242, 240, 233, 0.94);
+    --sp-stroke: rgba(20, 20, 20, 0.55);
+    --sp-dim: rgba(20, 20, 20, 0.28);
+    --sp-dark: #141414;
+    /* 30% of a saturated accent bathed the whole page in wine or navy — it read
+       as tinted paint rather than as a light in a dark room, and it buried the
+       sculpture behind it. The accent now behaves like a light source: present
+       at the core, gone by the edges. */
+    --mood-strength: 13%;
+    background-color: #08080a;
+    background-image:
+      radial-gradient(120% 80% at var(--mood-x) var(--mood-y),
+        color-mix(in srgb, var(--acc) var(--mood-strength), #0a0a0c) 0%,
+        color-mix(in srgb, var(--acc) 5%, #08080a) 44%,
+        #060607 100%);
+  }
+  /* the night accents live on <body> so the strip above the stage — the one the
+     header floats over — can paint the identical light (see below) */
+  :global(html[data-mode="night"] body[data-accent="support"]) { --acc: #5b7cff; --acc-deep: #8fa8ff; }
+  :global(html[data-mode="night"] body[data-accent="vision"]) { --acc: #f4547b; --acc-deep: #ff8ca3; }
+  :global(html[data-mode="night"] body[data-accent="simiutopia"]) { --acc: #46bedf; --acc-deep: #7dd7f0; }
+  :global(html[data-mode="night"] body[data-accent="subways"]) { --acc: #ff8a3d; --acc-deep: #ffae6b; }
+  :global(html[data-mode="night"] body[data-accent="classforge"]) { --acc: #58d99b; --acc-deep: #8ceec0; }
+
+  /* §15 v5.1 — the header used to float over a black strip that ended in a hard
+     line where the stage began. The stage's mood light is viewport-anchored, so
+     painting the SAME fixed gradient on <body> makes the two line up exactly:
+     the project's light now runs unbroken up under the capsule. */
+  :global(body[data-accent]) {
+    background-color: #f7f6f2;
+    background-attachment: fixed;
+    background-image:
+      radial-gradient(120% 80% at 64% 30%,
+        color-mix(in srgb, var(--acc) 16%, #fbfaf7) 0%,
+        color-mix(in srgb, var(--acc) 7%, #f7f6f2) 46%,
+        #f4f3ef 100%);
+  }
+  :global(html[data-mode="night"] body[data-accent]) {
+    background-color: #08080a;
+    background-image:
+      radial-gradient(120% 80% at 64% 30%,
+        color-mix(in srgb, var(--acc) 13%, #0a0a0c) 0%,
+        color-mix(in srgb, var(--acc) 5%, #08080a) 44%,
+        #060607 100%);
+  }
+
+  /* particles ride the whole page */
+  .stage-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .stage-particles-inner {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+  /* v4: the replay now shares the world with the rest of the site, so the
+     stage's own motes step back — they were reading as debris over the prose
+     rather than as atmosphere behind it */
+  .stage-particles {
+    opacity: 0.42;
+  }
+  .case-stage :global(.imm-particle) {
+    position: absolute;
+    bottom: -40px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%,
+      color-mix(in srgb, var(--acc) 85%, #ffffff),
+      color-mix(in srgb, var(--acc) 45%, transparent) 65%, transparent);
+    animation: imm-rise linear forwards;
+  }
+  @keyframes imm-rise {
+    0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+    10%, 90% { opacity: inherit; }
+    100% { transform: translateY(-110vh) translateX(30px) rotate(360deg); opacity: 0; }
+  }
+
+  /* every chapter is a scene */
+  .case-stage :global(.chapter) {
+    position: relative;
+  }
+  .case-stage :global(.chap-scene) {
+    position: absolute;
+    inset: -8% -4% -8% 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .case-stage :global(.chap-floater) {
+    position: absolute;
+    display: block;
+    opacity: 0;
+    filter: drop-shadow(0 12px 26px rgba(0, 0, 0, 0.55));
+    will-change: transform;
+  }
+  .case-stage :global(.chap-floater svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* the reading matter becomes glass on the stage */
+  .case-stage .case {
+    position: relative;
+    z-index: 2;
+  }
+  /* glass by translucency and rim light — no backdrop blur on long-page
+     panels (it cost 8 perf points in QA for no visible gain over a gradient) */
+  .case-stage :global(.step-into-body),
+  .case-stage :global(.demo-panel),
+  .case-stage :global(.raised),
+  .case-stage :global(.chapter-figure) {
+    background: var(--stage-glass);
+    border-color: var(--stage-edge);
+    box-shadow: inset 0 1px 0 var(--stage-rim), var(--stage-shadow);
+  }
+  .case-stage :global(.art) {
+    background: color-mix(in srgb, var(--paper-2) 70%, transparent);
+  }
+  .case-stage :global(.demo-chip),
+  .case-stage :global(.demo-reset),
+  .case-stage :global(.check-item),
+  .case-stage :global(.perm-table th),
+  .case-stage :global(.perm-table td) {
+    border-color: var(--stage-edge);
+  }
+  .case-stage :global(.demo-chip[aria-pressed="true"]),
+  .case-stage :global(.demo-chip[aria-checked="true"]) {
+    background: var(--acc);
+    border-color: var(--acc);
+    color: var(--paper);
+  }
+  .case-stage :global(.block-label),
+  .case-stage :global(.chapter-label),
+  .case-stage :global(.step-into summary) {
+    color: var(--acc-deep);
+  }
+  :global(html[data-mode="night"]) .case-stage :global(.block-label),
+  :global(html[data-mode="night"]) .case-stage :global(.chapter-label),
+  :global(html[data-mode="night"]) .case-stage :global(.step-into summary) {
+    color: color-mix(in srgb, var(--acc) 62%, #ffffff);
+  }
+  .case-stage :global(.playhead-bar) {
+    background: color-mix(in srgb, var(--paper) 82%, transparent);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+  }
+  @media (max-width: 1023px) {
+    .case-stage :global(.chap-scene) { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .case-stage { transition: none; }
+    /* v4: the replay now shares the world with the rest of the site, so the
+     stage's own motes step back — they were reading as debris over the prose
+     rather than as atmosphere behind it */
+  .stage-particles {
+    opacity: 0.42;
+  }
+  .case-stage :global(.imm-particle) { display: none; }
+  }
+
+</style>

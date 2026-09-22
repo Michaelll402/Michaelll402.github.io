@@ -1,0 +1,108 @@
+---
+// experience-about-skills.md — the same locked skill words, set as a
+// typographic index rather than a wall of logo cards.
+import { groups, GLYPHS } from "../../content/craft";
+---
+
+<section id="craft" class="section craft" aria-labelledby="craft-heading">
+  <div class="container">
+    <h2 id="craft-heading" class="label" data-reveal="label">
+      <span>Skills</span><span class="label-rule"></span>
+    </h2>
+    {/* a sentence, set large — but a sentence, not the section's heading */}
+    <p class="t-h2 craft-head" data-reveal="lines">
+      The tools behind the things I build.
+    </p>
+
+    <div class="craft-rows">
+      {
+        groups.map((g) => (
+          <div class="craft-row" data-reveal>
+            <h3 class="t-mono-s craft-cat">{g.label}</h3>
+            <ul class="craft-list">
+              {g.items.map((item) => (
+                <li class="craft-item" style={item.icon ? `--brand:${item.icon.hex}` : undefined}>
+                  <svg viewBox="0 0 24 24" class="craft-mark" aria-hidden="true" focusable="false">
+                    <path d={item.icon ? item.icon.path : (GLYPHS[item.label] ?? GLYPHS.SQL)} />
+                  </svg>
+                  <span class="craft-word">{item.label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .craft-head {
+    max-width: 22ch;
+    margin-bottom: var(--space-8);
+  }
+
+  .craft-rows {
+    display: grid;
+    gap: var(--space-6);
+    /* the words hold a column; the right margin belongs to the world */
+    max-width: 64rem;
+  }
+  .craft-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+    padding-block: var(--space-5);
+    border-top: var(--hairline) solid var(--line-2);
+  }
+  @media (min-width: 900px) {
+    .craft-row {
+      grid-template-columns: 13rem minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: baseline;
+    }
+  }
+  .craft-cat {
+    text-transform: uppercase;
+    letter-spacing: var(--track-eyebrow);
+    color: var(--ink-3);
+  }
+
+  .craft-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+  }
+  .craft-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: var(--text-body-l);
+    color: var(--ink-2);
+    line-height: 1.2;
+    transition: color var(--dur-medium) var(--ease-smooth), transform var(--dur-medium) var(--ease-out-expo);
+  }
+  .craft-item:hover {
+    color: var(--ink);
+    transform: translateY(-2px);
+  }
+  /* the mark is a mark, not a badge: monochrome, small, aligned to the x-height */
+  .craft-mark {
+    width: 0.92em;
+    height: 0.92em;
+    flex: none;
+    fill: var(--ink-3);
+    transition: fill var(--dur-medium) var(--ease-smooth), filter var(--dur-medium) var(--ease-smooth);
+  }
+  .craft-item:hover .craft-mark {
+    fill: var(--acc);
+    filter: drop-shadow(0 0 8px var(--glow));
+  }
+  html[data-mode="day"] .craft-item:hover .craft-mark {
+    fill: var(--brand, var(--acc));
+    filter: none;
+  }
+  .craft-word {
+    white-space: nowrap;
+  }
+</style>

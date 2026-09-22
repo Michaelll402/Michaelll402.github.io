@@ -1,0 +1,24 @@
+---
+import CaseLayout from "../../components/work/CaseLayout.astro";
+import Chapter from "../../components/work/Chapter.astro";
+import OmittedAside from "../../components/work/OmittedAside.astro";
+import SubwaysArt from "../../components/art/SubwaysArt.astro";
+import SubwaysDemo from "../../components/islands/SubwaysDemo";
+import { subways } from "../../content/work/subways";
+
+const ch = subways.chapters;
+---
+
+<CaseLayout cs={subways}>
+  <SubwaysArt slot="hero-art" />
+
+  <Chapter chapter={ch[0]} />
+  <Chapter chapter={ch[1]} />
+  <Chapter chapter={ch[2]}>
+    <SubwaysDemo slot="demo" client:visible={{ rootMargin: "300px" }} />
+  </Chapter>
+  <Chapter chapter={ch[3]} />
+  <OmittedAside label={subways.omitted!.label} note={subways.omitted!.note} />
+  <Chapter chapter={ch[4]} />
+  <Chapter chapter={ch[5]} />
+</CaseLayout>

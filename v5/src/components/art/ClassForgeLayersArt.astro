@@ -1,0 +1,89 @@
+---
+// The dependency direction, drawn from docs/ARCHITECTURE.md verbatim:
+//   domain ← command ← persistence/validation/layout/canvas/ui ← app
+// Every arrow points one way. The domain band is sealed — the doc's own claim,
+// "zero UI or framework dependencies", is the caption on the lock.
+interface Props {
+  title?: string;
+}
+const {
+  title = "ClassForge's layered architecture: app depends on the ui, canvas, persistence, validation and layout layers; those depend on the command layer; commands depend on the domain, which has zero UI or framework dependencies.",
+} = Astro.props;
+
+const bands = [
+  { y: 40, label: "app", detail: "ClassForgeApp · AppContext · FileWorkflow" },
+  { y: 118, label: "ui · canvas · persistence · validation · layout", detail: "MainWindow · DiagramCanvas · DocumentStore · ValidationEngine · ElkLayoutService" },
+  { y: 196, label: "command", detail: "DiagramEditor · UndoManager · CompositeCommand" },
+  { y: 274, label: "domain", detail: "DiagramDocument · TypeElement · Relationship · DocEvent", sealed: true },
+];
+---
+
+<svg viewBox="0 0 800 380" role="img" aria-label={title} class="art">
+  {
+    bands.map((b) => (
+      <g class={b.sealed ? "band sealed" : "band"}>
+        <rect x="90" y={b.y} width="620" height="58" rx="8" class="band-body" />
+        <text x="112" y={b.y + 26} class="t-layer">{b.label}</text>
+        <text x="112" y={b.y + 45} class="t-detail">{b.detail}</text>
+      </g>
+    ))
+  }
+
+  <!-- the one direction: each layer leans only on the one below -->
+  {
+    [98, 176, 254].map((y) => (
+      <g class="dep">
+        <path d={`M400 ${y} V${y + 20}`} class="dep-line" />
+        <path d={`M400 ${y + 20} l-5 -8 h10 Z`} class="dep-head" />
+      </g>
+    ))
+  }
+
+  <!-- the seal on the domain: zero UI or framework dependencies -->
+  <g class="seal">
+    <rect x="530" y="286" width="166" height="24" rx="12" class="seal-body" />
+    <text x="613" y="302" class="t-seal" text-anchor="middle">zero UI dependencies</text>
+  </g>
+</svg>
+
+<style>
+  .art {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .band-body {
+    fill: var(--paper-2);
+    stroke: var(--line);
+    stroke-width: 1.4;
+  }
+  .sealed .band-body {
+    stroke: var(--acc);
+    stroke-width: 1.8;
+    fill: color-mix(in srgb, var(--acc) 7%, var(--paper-2));
+  }
+  .t-layer {
+    font: 600 14px var(--font-mono);
+    fill: var(--ink);
+  }
+  .t-detail {
+    font: 400 11.5px var(--font-mono);
+    fill: var(--ink-2);
+  }
+  .dep-line {
+    stroke: var(--acc-deep);
+    stroke-width: 1.8;
+  }
+  .dep-head {
+    fill: var(--acc-deep);
+  }
+  .seal-body {
+    fill: color-mix(in srgb, var(--acc) 14%, transparent);
+    stroke: var(--acc);
+    stroke-width: 1.2;
+  }
+  .t-seal {
+    font: 500 11px var(--font-mono);
+    fill: var(--acc-deep);
+  }
+</style>

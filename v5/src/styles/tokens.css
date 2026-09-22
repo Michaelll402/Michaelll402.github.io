@@ -1,0 +1,175 @@
+/* ============================================================================
+   v4 DESIGN TOKENS — dark first
+   ----------------------------------------------------------------------------
+   v4 is authored in the dark. The night values are the design; the day values
+   are a second, deliberate grade of the same system rather than an inversion.
+   Every token name from v3 survives so the case-study components keep working;
+   the values behind them are new.
+   ========================================================================== */
+
+:root {
+  /* ---------- surface ---------- */
+  --void: #05060a;
+  --paper: #05060a;
+  --paper-2: rgba(255, 255, 255, 0.045);
+  --ink: #f3f1eb;
+  --ink-2: rgba(243, 241, 235, 0.62);
+  --ink-3: rgba(243, 241, 235, 0.58);
+  --line: rgba(243, 241, 235, 0.14);
+  --line-2: rgba(243, 241, 235, 0.07);
+  --hairline: 1px;
+  --rule-strong: 2px;
+
+  /* ---------- the four projects ---------- */
+  --acc-support: #7f9cff;
+  --acc-support-deep: #b3c4ff;
+  --acc-vision: #ff7d99;
+  --acc-vision-deep: #ffb0c0;
+  --acc-simiutopia: #5fd0ee;
+  --acc-simiutopia-deep: #9ee4f7;
+  --acc-subways: #ffa059;
+  --acc-subways-deep: #ffc79b;
+  --acc-classforge: #58d99b;
+  --acc-classforge-deep: #8ceec0;
+  --acc: var(--acc-support);
+  --acc-deep: var(--acc-support-deep);
+  --glow: color-mix(in srgb, var(--acc) 40%, transparent);
+
+  /* ---------- glass ---------- */
+  /* With the backdrop blur gone from the large panels, the fill has to do the
+     work the filter used to: a panel you can read the world straight through is
+     a rectangle, not glass. */
+  --glass-bg: rgba(8, 9, 15, 0.62);
+  --glass-bg-2: rgba(255, 255, 255, 0.1);
+  --glass-blur: 18px;
+  --glass-rim: rgba(255, 255, 255, 0.16);
+  --glass-rim-lit: rgba(255, 255, 255, 0.38);
+  --glass-sheen: rgba(255, 255, 255, 0.07);
+  --glass-shadow: 0 32px 80px -48px rgba(0, 0, 0, 0.9);
+
+  /* ---------- type ---------- */
+  --font-display: "Newsreader", ui-serif, Georgia, serif;
+  --font-body: "Public Sans", "Public Sans Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* the display sizes carry the identity: they are allowed to be enormous */
+  --text-display-0: clamp(3rem, 17vw, 15.5rem);
+  --text-display-1: clamp(2.9rem, 9.2vw, 8.2rem);
+  --text-display-2: clamp(2.55rem, 7.4vw, 4.6rem);
+  --text-h2: clamp(1.85rem, 3.4vw, 3.1rem);
+  --text-h3: clamp(1.15rem, 1.6vw, 1.5rem);
+  --text-body-l: clamp(1.05rem, 1.25vw, 1.28rem);
+  --text-body: 1rem;
+  --text-body-s: 0.9rem;
+  --text-mono: 0.82rem;
+  --text-mono-s: 0.72rem;
+
+  --leading-display: 0.9;
+  --leading-heading: 1.06;
+  --leading-body: 1.62;
+  --leading-mono: 1.5;
+  --track-display: -0.028em;
+  --track-eyebrow: 0.24em;
+  --track-mono: 0.06em;
+  --opsz-display: 44;
+  --opsz-heading: 22;
+
+  --measure: 34em;
+  --measure-wide: 46em;
+
+  /* ---------- space ---------- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 7rem;
+  --space-section: clamp(6rem, 14vh, 11rem);
+  --space-chapter: clamp(4rem, 9vh, 7rem);
+  --gutter: clamp(1.25rem, 5vw, 4.5rem);
+  --container: 84rem;
+  --radius: 14px;
+  --radius-s: 8px;
+  --tap-min: 44px;
+  --strand: 2px;
+  --strand-gap: 6px;
+  --header-h: 66px;
+  --header-h-mobile: 58px;
+
+  /* ---------- motion ----------
+     One small set of tokens. GSAP uses the same curves by name so CSS and
+     JavaScript motion cannot drift apart. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-out: var(--ease-out-expo);
+  --ease-ui: var(--ease-smooth);
+  --ease-story: var(--ease-out-expo);
+  --dur-fast: 180ms;
+  --dur-medium: 420ms;
+  --dur-slow: 900ms;
+  --dur-ui: var(--dur-medium);
+  --dur-scene: 700ms;
+  --dur-story: var(--dur-slow);
+
+  /* ---------- depth ----------
+     Z is a design token, not an accident of source order. */
+  --z-world: 0;
+  --z-base: 1;
+  --z-raised: 5;
+  --z-playhead: 20;
+  --z-header: 60;
+  --z-transition: 70;
+  --z-cursor: 90;
+  --z-skip: 100;
+
+  /* written every frame by the scroll controller, read by CSS for kinetics */
+  --vel: 0;
+
+  color-scheme: dark;
+}
+
+/* ============================================================================
+   DAY — the same world at noon. The field becomes luminous, the ink becomes
+   ink again, and the sculpture's grade flips in the shader to match.
+   ========================================================================== */
+html[data-mode="day"] {
+  --void: #edebe5;
+  --paper: #edebe5;
+  --paper-2: rgba(20, 20, 26, 0.035);
+  --ink: #14141a;
+  --ink-2: rgba(20, 20, 26, 0.66);
+  --ink-3: rgba(20, 20, 26, 0.6);
+  --line: rgba(20, 20, 26, 0.16);
+  --line-2: rgba(20, 20, 26, 0.08);
+
+  --acc-support: #1b3fe4;
+  --acc-support-deep: #16309f;
+  --acc-vision: #c31742;
+  --acc-vision-deep: #8f1130;
+  --acc-simiutopia: #1c8aa8;
+  --acc-simiutopia-deep: #17708a;
+  --acc-subways: #cc5310;
+  --acc-subways-deep: #a8420c;
+  --acc-classforge: #1d7f4b;
+  --acc-classforge-deep: #155f38;
+
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-bg-2: rgba(255, 255, 255, 0.75);
+  --glass-rim: rgba(255, 255, 255, 0.9);
+  --glass-rim-lit: rgba(255, 255, 255, 1);
+  --glass-sheen: rgba(255, 255, 255, 0.55);
+  --glass-shadow: 0 30px 70px -50px rgba(20, 20, 26, 0.55);
+
+  color-scheme: light;
+}
+
+/* per-project accent scope */
+[data-accent="support"] { --acc: var(--acc-support); --acc-deep: var(--acc-support-deep); }
+[data-accent="vision"] { --acc: var(--acc-vision); --acc-deep: var(--acc-vision-deep); }
+[data-accent="simiutopia"] { --acc: var(--acc-simiutopia); --acc-deep: var(--acc-simiutopia-deep); }
+[data-accent="subways"] { --acc: var(--acc-subways); --acc-deep: var(--acc-subways-deep); }
+[data-accent="classforge"] { --acc: var(--acc-classforge); --acc-deep: var(--acc-classforge-deep); }

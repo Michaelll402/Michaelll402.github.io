@@ -1,0 +1,243 @@
+---
+import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import Nav from "../components/site/Nav.astro";
+import Footer from "../components/site/Footer.astro";
+import WorldFallback from "../components/site/WorldFallback.astro";
+import newsreaderUrl from "../assets/fonts/Newsreader-var.woff2?url";
+
+interface Props {
+  title: string;
+  description?: string;
+  /** what the OG image shows, for people browsing with images described to them */
+  ogAlt?: string;
+  accent?: "support" | "vision" | "simiutopia" | "subways" | "classforge";
+  noindex?: boolean;
+  ogImage?: string;
+  jsonLd?: Record<string, unknown>;
+}
+const { title, description, accent, noindex = false, ogImage, ogAlt, jsonLd } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogUrl = ogImage ? new URL(`/og/${ogImage}.png`, Astro.site) : null;
+---
+
+<!doctype html>
+<html lang="en" class="no-js" data-mode="night">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script is:inline>
+      // v4 is authored in the dark, so night is the default and day is opt-in.
+      // The mode is ALWAYS stamped explicitly rather than left implicit: the
+      // case-study components inherited from v3 key their dark grade off
+      // [data-mode="night"], and an implicit default would render them in a
+      // light theme inside a dark world.
+      document.documentElement.classList.replace("no-js", "js");
+      try {
+        document.documentElement.dataset.mode =
+          localStorage.getItem("site-mode") === "day" ? "day" : "night";
+      } catch (e) {
+        document.documentElement.dataset.mode = "night";
+      }
+      // client-side navigation delivers a freshly rendered document still marked
+      // `no-js`: re-stamp it before it swaps in, or every JS-only control vanishes
+      if (!window.__mtSwapWired) {
+      window.__mtSwapWired = true;
+      document.addEventListener("astro:before-swap", (e) => {
+        const root = e.newDocument.documentElement;
+        root.classList.remove("no-js");
+        root.classList.add("js");
+        root.classList.add("navigated");
+        root.dataset.mode = document.documentElement.dataset.mode || "night";
+        // the world reads this so it hurries its morph and lands with the page
+        try {
+          window.__mt_motion_v4__.swappedAt = performance.now();
+        } catch (err) {}
+        if (document.documentElement.classList.contains("world-ready"))
+          root.classList.add("world-ready");
+        for (const state of ["world-presented", "no-webgl"]) {
+          if (document.documentElement.classList.contains(state)) root.classList.add(state);
+        }
+      });
+      }
+    </script>
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#05060a" />
+<meta property="og:type" content={Astro.url.pathname === "/" ? "profile" : "article"} />
+    <meta property="og:site_name" content="Michael Tawfik" />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="og:title" content={title} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical} />
+    {ogUrl && <meta property="og:image" content={ogUrl} />}
+    {ogUrl && <meta property="og:image:secure_url" content={ogUrl} />}
+    {ogUrl && <meta property="og:image:type" content="image/png" />}
+    {ogUrl && <meta property="og:image:width" content="1200" />}
+    {ogUrl && <meta property="og:image:height" content="630" />}
+    {ogUrl && ogAlt && <meta property="og:image:alt" content={ogAlt} />}
+    {/* Twitter reads the og:* tags as a fallback, but only some crawlers do, and
+        a wrong preview is the one SEO mistake a person cannot fix after posting. */}
+    <meta name="twitter:card" content={ogUrl ? "summary_large_image" : "summary"} />
+    <meta name="twitter:title" content={title} />
+    {description && <meta name="twitter:description" content={description} />}
+    {ogUrl && <meta name="twitter:image" content={ogUrl} />}
+    {ogUrl && ogAlt && <meta name="twitter:image:alt" content={ogAlt} />}
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    <link rel="preload" href={newsreaderUrl} as="font" type="font/woff2" crossorigin />
+    <meta name="generator" content={Astro.generator} />
+    <ClientRouter fallback="swap" />
+  </head>
+  <body data-accent={accent}>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <!-- The refraction map the nav rail bends its backdrop through. Chromium
+         supports url() in backdrop-filter; everywhere else the @supports guard
+         leaves the plain blurred glass, which still looks correct. -->
+    <svg class="filters" width="0" height="0" aria-hidden="true" focusable="false">
+      <filter id="liquid-glass" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.02" numOctaves="2" seed="7" result="warp" />
+        <feDisplacementMap in="SourceGraphic" in2="warp" scale="18" xChannelSelector="R" yChannelSelector="G" />
+      </filter>
+    </svg>
+
+    <!-- The persistent world. It survives client-side navigation, so moving
+         between the index and a case study moves the camera, not the context. -->
+    {/* DEV ONLY. @vitejs/plugin-react transforms React modules with React
+        Refresh and expects a preamble in the page; Astro injects that preamble
+        only when the page declares a React island. This page mounts the world by
+        hand instead (see the boot script), so with the island gone the preamble
+        went too and the dev server threw "can't detect preamble" — the world
+        rendered in `pnpm build` but never in `pnpm dev`.
+
+        Injecting it here keeps ONE mounting path for dev and production, which
+        is the point: a dev-only code branch would mean the thing being developed
+        is not the thing that ships. Vite strips this block from the build. */}
+    {import.meta.env.DEV && (
+      <script
+        type="module"
+        is:inline
+        set:html={`
+import RefreshRuntime from "/@react-refresh";
+RefreshRuntime.injectIntoGlobalHook(window);
+window.$RefreshReg$ = () => {};
+window.$RefreshSig$ = () => (type) => type;
+window.__vite_plugin_react_preamble_installed__ = true;
+`}
+      />
+    )}
+
+    <div class="world" aria-hidden="true" transition:persist="world">
+      <WorldFallback accent={accent} />
+      <div data-world-root></div>
+    </div>
+
+    <div class="cursor" data-cursor aria-hidden="true">
+      <span class="cursor-label">read</span>
+    </div>
+
+    <div class="doc">
+      <Nav />
+      <main id="main">
+        <slot />
+      </main>
+      <Footer />
+    </div>
+
+    <script>
+      import { initScroll, refreshScroll } from "../lib/scroll";
+      import { initPointer } from "../lib/pointer";
+      import { initReveals } from "../lib/reveal";
+      import { initSurfaces } from "../lib/surfaces";
+      import { initTransition } from "../lib/transition";
+      import { initPlayhead } from "../lib/playhead";
+      import { motion } from "../webgl/store";
+      import { renderingPolicy } from "../webgl/render-policy";
+      import { initMobileGalaxy } from "../lib/mobile-galaxy";
+      import { initMobileArtMotion } from "../lib/mobile-art-motion";
+      import { initMobileMotionPreference } from "../lib/mobile-motion-preference";
+
+      let teardown: Array<() => void> = [];
+      initTransition();
+      initMobileMotionPreference();
+      initMobileGalaxy();
+
+      /* Decide before loading the renderer. The server-rendered sculpture is
+         already visible; desktop can fetch its full scene after first paint. */
+      function mountWorld() {
+        const host = document.querySelector<HTMLElement>("[data-world-root]");
+        if (!host || host.dataset.mounted) return;
+        host.dataset.mounted = "1";
+        const policy = renderingPolicy();
+        host.dataset.renderer = policy.renderer;
+        motion.tier = policy.tier;
+        if (policy.renderer === "static") return;
+        performance.mark("world:requested");
+        // The artwork is already present. This is an enhancement budget, not
+        // a loading screen: slow optional code must not replace it much later.
+        const lifetime = new AbortController();
+        const fallback = (reason: string) => {
+          clearTimeout(deadline);
+          lifetime.abort();
+          document.documentElement.classList.remove("world-ready", "world-presented");
+          document.documentElement.classList.add("no-webgl");
+          host.dataset.renderer = "fallback";
+          host.dataset.fallbackReason = reason;
+        };
+        const deadline = setTimeout(() => fallback("enhancement-timeout"), 5000);
+        host.addEventListener("world-presented", () => clearTimeout(deadline), { once: true, signal: lifetime.signal });
+        window.addEventListener("pagehide", event => {
+          if (!event.persisted) { clearTimeout(deadline); lifetime.abort(); }
+        }, { signal: lifetime.signal });
+        const renderer = import("../webgl/mount").then(m => {
+          if (!lifetime.signal.aborted) return m.mountWorld(host, policy.tier, lifetime.signal);
+        });
+        renderer.catch(() => fallback("enhancement-unavailable"));
+      }
+
+      let bootedBody: HTMLElement | null = null;
+      let queued = 0;
+      let generation = 0;
+      function disposePage() {
+        generation++;
+        cancelAnimationFrame(queued);
+        teardown.forEach((fn) => fn());
+        teardown = [];
+        bootedBody = null;
+      }
+      function boot() {
+        if (bootedBody === document.body) return;
+        bootedBody = document.body;
+        const ownGeneration = generation;
+        motion.mode = document.documentElement.dataset.mode === "day" ? "day" : "night";
+        teardown.push(initScroll());
+        teardown.push(initPointer());
+        teardown.push(initSurfaces());
+        teardown.push(initPlayhead());
+        teardown.push(initReveals());
+        teardown.push(initMobileArtMotion());
+        mountWorld();
+        // fonts change every line box, and therefore every anchor and every split
+        document.fonts?.ready.then(() => {
+          if (ownGeneration === generation) refreshScroll();
+        });
+      }
+
+      // One coalesced page boot; content itself is never gated by this work.
+      const start = () => {
+        cancelAnimationFrame(queued);
+        const ownGeneration = generation;
+        queued = requestAnimationFrame(() => {
+          queued = requestAnimationFrame(() => { if (ownGeneration === generation) boot(); });
+        });
+      };
+      start();
+      document.addEventListener("astro:before-swap", disposePage);
+      document.addEventListener("astro:page-load", start);
+    </script>
+  </body>
+</html>
