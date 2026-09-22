@@ -1,22 +1,46 @@
-# Michael's Portfolio
+# Michael Tawfik — Portfolio
 
-A clean, responsive personal website to showcase my projects, resume, and contact details.
+[Visit the live portfolio](https://michaelll402.github.io/)
 
-🔗 **Live Site**: [michaelll402.github.io](https://michaelll402.github.io)
+The portfolio of Michael Tawfik, a Computer Science student at ELTE in Budapest working toward full-stack software engineering roles. It presents selected projects through case studies and interactive demonstrations.
 
-## 💻 Tech Stack
-- HTML5, CSS3, JavaScript
-- GitHub Pages for deployment
+## Explore the work
 
-## 📸 Preview
-![screenshot](preview.png)
+- [Customer Support Ticketing SaaS](https://michaelll402.github.io/work/support/) — full-stack support workflows, realtime updates, and access control.
+- [Face Recognition Attendance](https://michaelll402.github.io/work/vision/) — a Python computer-vision and attendance project.
+- [Simiutopia](https://michaelll402.github.io/work/simiutopia/) — vehicle movement and persistence work in a Java city simulation.
+- [Subways of Budapest](https://michaelll402.github.io/work/subways/) — a JavaScript route-building game with rule validation.
+- [ClassForge](https://michaelll402.github.io/work/classforge/) — a local-first Java UML class-diagram editor for Windows.
 
-## 🧩 Features
-- Mobile-first responsive design
-- Smooth scroll and animations
-- Contact form with Formspree integration
+The site also includes Michael's experience, skills, contact details, and [CV](https://michaelll402.github.io/cv.pdf).
 
-## 📦 Installation (Optional)
-```bash
-git clone https://github.com/Michaelll402/michaelll402.github.io.git
-cd michaelll402.github.io
+## Technology
+
+Built as a static Astro 5 site with TypeScript, React islands for interactive experiences, and Three.js/React Three Fiber for the desktop galaxy. Mobile uses a lighter visual treatment. The public contact form uses Formspree. Fonts and portfolio assets are served with the site.
+
+## Run locally
+
+Use Node.js 24 and pnpm 11.8.0. From the repository root:
+
+```sh
+cd v5
+pnpm install --frozen-lockfile
+pnpm dev
+```
+
+For a production check:
+
+```sh
+pnpm check
+pnpm test
+pnpm build
+pnpm preview
+```
+
+## Deployment
+
+The [GitHub Pages workflow](.github/workflows/deploy-v5.yml) builds `v5/` and publishes only its generated static artifact at the repository's root website. It runs on relevant pushes to `main` and can also be started manually. No server runtime or deployment commit is required.
+
+## Contact
+
+[Email Michael](mailto:michaeltawfik2004@gmail.com) or use the contact form on the [live site](https://michaelll402.github.io/).
